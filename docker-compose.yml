@@ -1,0 +1,85 @@
+name: prototyper-dev
+
+services:
+  api: 
+    build: 
+      context: .
+      dockerfile: ./docker/Dockerfile
+      target: dev
+    volumes:
+      - ./src/:/app/src/
+    command: >
+      bash -c "uvicorn src.main:api --host 0.0.0.0 --port 8000 --reload"
+    # bash -c "gunicorn src.main:api --workers 10 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000"
+    restart: on-failure
+    env_file: 
+      - .env.dev 
+    ports: 
+      - 8888:8000
+    depends_on:
+      - redis
+      - postgres
+      - migrations
+    networks: 
+      - app-network
+  migrations: 
+    build: 
+      context: .
+      dockerfile: ./docker/Dockerfile
+      target: dev
+    volumes:
+      - ./src/:/app/src/
+    command: >
+      bash -c "alembic upgrade head"
+    env_file: 
+      - .env.dev 
+    depends_on:
+      - postgres
+    networks: 
+      - app-network
+
+  postgres:
+    image: postgres:latest
+    env_file:
+      - .env.dev
+    networks:
+      - app-network
+    ports:
+      - "5432:5432"
+    volumes:
+      - "postgres:/data/postgres"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    command: >
+      postgres -c max_connections=1000
+                -c shared_buffers=256MB
+                -c effective_cache_size=768MB
+                -c maintenance_work_mem=64MB
+                -c checkpoint_completion_target=0.7
+                -c wal_buffers=16MB
+                -c default_statistics_target=100
+  redis:
+    image: redis
+    container_name: redis
+    restart: unless-stopped
+    volumes:
+      - ./redis/data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+    expose:
+      - 6379
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+    networks: 
+      - app-network
+        
+networks:
+  app-network:
+
+volumes:
+  postgres:
