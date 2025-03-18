@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Mapped
 
-from src.database.models.base_model import BaseModel
+from src.database.base_model import BaseModel
 
 
 class LessonModel(BaseModel):

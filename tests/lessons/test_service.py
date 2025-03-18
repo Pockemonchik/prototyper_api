@@ -1,6 +1,6 @@
 import pytest
 
-from src.services.lessons_service import LessonsService
+from src.lessons.service import LessonsService
 
 
 @pytest.mark.asyncio

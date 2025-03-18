@@ -21,6 +21,6 @@ mock.patch("fastapi_cache.decorator.cache", mock_cache).start()
 
 @pytest.fixture()
 def test_client() -> TestClient:
-    from src.main import graph_api
+    from src.core.api import api
 
-    return TestClient(graph_api)
+    return TestClient(api)

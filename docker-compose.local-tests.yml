@@ -9,8 +9,7 @@ services:
         target: test
       
       command: >
-        bash -c "python -m src.migrate 
-        && coverage run --rcfile ./pyproject.toml -m pytest ./tests"
+         coverage run --rcfile ./pyproject.toml -m pytest ./tests"
       volumes:
         - ./src/:/usr/src/app/
       env_file: 

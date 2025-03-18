@@ -10,8 +10,8 @@ from fastapi_cache.backends.redis import RedisBackend
 from prometheus_fastapi_instrumentator import Instrumentator
 from redis import asyncio as aioredis  # type: ignore
 
-from src.api.rest.controllers.lessson_controller import router as lessons_router
-from src.api.schemas import APIErrorMessage
+from src.lessons.views import router as lessons_router
+from src.core.schemas import APIErrorMessage
 from src.core import settings
 from src.core.errors import ResourceNotFoundError
 from src.core.logger import logger

@@ -22,6 +22,12 @@ tests:
 docker-tests:
 	docker compose -f ./docker-compose.local-tests.yml up --build test
 
+docker-makemigrations:
+	docker compose exec api /bin/bash -c "alembic revision --autogenerate"
+
+docker-migrate:
+	docker compose exec api /bin/bash -c "alembic upgrade head"
+
 # dev 
 
 python-dev: 
@@ -29,3 +35,4 @@ python-dev:
 
 docker-dev: 
 	docker compose up --build
+

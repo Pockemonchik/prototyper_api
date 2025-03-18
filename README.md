@@ -1,6 +1,6 @@
-# PROJECTNAME
+# PROTOTYPER_API
 
-Микросервис для ...
+Сервис для предоставления данных по REST API для проекта prototyper
 
 ## Getting started
 

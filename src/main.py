@@ -3,13 +3,17 @@ import asyncio
 import uvicorn
 
 
-from .core.logger import logger
+from src.core.logger import logger
+
+from src.core.api import api
+
+app = api
 
 
 async def main() -> None:
     """Точка входа в приложение"""
     logger.info("run app")
-    uvicorn.run("src.main:app", reload=True)
+    uvicorn.run("src.core.api:api", reload=True)
 
 
 if __name__ == "__main__":
