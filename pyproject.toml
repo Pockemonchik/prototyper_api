@@ -24,6 +24,7 @@ uvicorn = "^0.32.0"
 sqlalchemy = "^2.0.39"
 alembic = "^1.15.1"
 asyncpg = "^0.30.0"
+sqladmin = "^0.20.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"

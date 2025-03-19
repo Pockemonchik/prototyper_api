@@ -30,11 +30,11 @@ class LessonsRepository:
         stmt = select(self.model)
         obj_list = await self.session.execute(stmt)
         await self.session.close()
-        result = [LessonSchema.model_validate(l) for l in obj_list.unique().all()]
+        result = [LessonSchema.model_validate(l) for l in obj_list.scalars().all()]
         return result
 
     async def add_one(self, new_Lesson: CreateLessonSchema) -> LessonSchema:
-        """Добавление заметки, без тэгов"""
+        """Добавление объекта"""
         new_object = self.model(**new_Lesson.model_dump())
         self.session.add(new_object)
         await self.session.commit()
@@ -44,7 +44,7 @@ class LessonsRepository:
     async def update_one(
         self, id: int, Lesson_update: UpdateLessonSchema
     ) -> LessonSchema:
-        """Обновление модель"""
+        """Обновление объекта"""
         obj = await self.session.get(self.model, id)
         if obj == None:
             await self.session.close()
@@ -57,7 +57,7 @@ class LessonsRepository:
             return LessonSchema.model_validate(obj)
 
     async def delete_one(self, id: int) -> int:
-        """Удаление модели"""
+        """Удаление объекта"""
         obj = await self.session.get(self.model, id)
         await self.session.commit()
         if obj == None:
@@ -78,5 +78,5 @@ class LessonsRepository:
         stmt = select(self.model).filter(*filters)
         obj = await self.session.execute(stmt)
         await self.session.commit()
-        result = [LessonSchema.model_validate(l) for l in obj.unique().all()]
+        result = [LessonSchema.model_validate(l) for l in obj.scalars().all()]
         return list(result)
