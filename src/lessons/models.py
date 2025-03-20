@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.database.base_model import BaseModel
+from src.database.base_model import BaseSqlAchemyModel
 
 
-class LessonModel(BaseModel):
+class LessonModel(BaseSqlAchemyModel):
     __tablename__ = "lessons"
     name: Mapped[str]
     description: Mapped[str] = mapped_column(nullable=True)

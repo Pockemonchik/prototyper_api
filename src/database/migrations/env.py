@@ -7,8 +7,9 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from src.database.base_model import BaseModel
+from src.database.base_model import BaseSqlAchemyModel as BaseModel
 from src.lessons.models import *
+from src.users.models import *
 
 # TODO make import from all models dymanic
 # this is the Alembic Config object, which provides

@@ -7,9 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from src.core.schemas import APIErrorMessage
-from src.core.logger import logger
 from src.lessons.repository import LessonsRepository
-from src.lessons.shemas import LessonSchema
+from src.lessons.schemas import LessonSchema
 import src.core.dependencies as core_deps
 
 router = APIRouter(
@@ -74,7 +73,6 @@ async def get_lesson_by_id(
         500: {"model": APIErrorMessage},
     },
 )
-@cache(expire=100)
 async def delete_lesson_by_id(
     session: Annotated[
         AsyncSession,

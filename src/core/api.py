@@ -12,13 +12,14 @@ from redis import asyncio as aioredis  # type: ignore
 
 from src.lessons.views import router as lessons_router
 from src.texts.views import router as texts_router
+from src.users.views import users_router, auth_router
 from src.core.schemas import APIErrorMessage
 from src.core import settings
 from src.core.errors import ResourceNotFoundError
 from src.core.logger import logger
 from src.database.db_manager import AsyncPostgresDatabaseManager
 from sqladmin import Admin
-from src.core.admin import LessonAdmin
+from src.core.admin import LessonAdmin, UserAdmin
 
 
 @asynccontextmanager
@@ -44,11 +45,14 @@ api = FastAPI(
 
 api.include_router(lessons_router)
 api.include_router(texts_router)
+api.include_router(users_router)
+api.include_router(auth_router)
 
 admin = Admin(
     api, AsyncPostgresDatabaseManager(url=settings.settings.postgres_url).engine
 )
 admin.add_view(LessonAdmin)
+admin.add_view(UserAdmin)
 
 Instrumentator().instrument(api).expose(api)
 
