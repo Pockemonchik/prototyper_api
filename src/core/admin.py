@@ -1,12 +1,39 @@
 from sqladmin import ModelView
 
-from src.lessons.models import LessonModel
+from src.lessons.models import (
+    LessonModel,
+    LessonResultModel,
+    LessonStepModel,
+    LessonStepTextModel,
+    LessonStepResultModel,
+    LessonStepTimingModel,
+)
 from src.users.models import UserModel
 
 
-class LessonAdmin(ModelView, model=LessonModel):
+class LessonModelAdmin(ModelView, model=LessonModel):
     column_list = [LessonModel.id, LessonModel.name]
 
 
-class UserAdmin(ModelView, model=UserModel):
+class LessonResultModelAdmin(ModelView, model=LessonResultModel):
+    column_list = [LessonResultModel.id]
+
+
+class LessonStepModelAdmin(ModelView, model=LessonStepModel):
+    column_list = [LessonStepModel.id]
+
+
+class LessonStepTextModelAdmin(ModelView, model=LessonStepTextModel):
+    column_list = [LessonStepTextModel.id]
+
+
+class LessonStepResultModelAdmin(ModelView, model=LessonStepResultModel):
+    column_list = [LessonStepResultModel.id]
+
+
+class LessonStepTimingModelAdmin(ModelView, model=LessonStepTimingModel):
+    column_list = [LessonStepTimingModel.id]
+
+
+class UserModelAdmin(ModelView, model=UserModel):
     column_list = [UserModel.id, UserModel.username]

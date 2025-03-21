@@ -129,10 +129,10 @@ class BaseSqlAlchemyRepository(metaclass=RepoTypeCheckedMeta):
             await self.session.close()
             return id
 
-    async def filter_by_field(self, params: dict) -> List[entity_schema]:
+    async def filter_by_field(self, **kwargs) -> List[entity_schema]:
         """Фильтр любому полю"""
         filters = []
-        for key, value in params.items():
+        for key, value in kwargs.items():
             if value != None:
                 filters.append(getattr(self.model, key) == value)
         stmt = select(self.model).filter(*filters)

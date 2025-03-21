@@ -8,8 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.schemas import APIErrorMessage
 from src.lessons.repository import LessonsRepository
-from src.lessons.schemas import LessonSchema
+from src.lessons.schemas import LessonSchema, LessonWithResultSchema
 import src.core.dependencies as core_deps
+
+# import src.users.dependencies as users_deps
 
 router = APIRouter(
     prefix="/lessons",
@@ -31,11 +33,24 @@ async def get_lessons_list(
         AsyncSession,
         Depends(core_deps.get_session),
     ],
+    # user_id: Annotated[
+    #     int,
+    #     Depends(users_deps.get_current_user_id),
+    # ],
 ) -> JSONResponse:
     """Получение списка уроков"""
     repository = LessonsRepository(session=session)
-    lesson_list = await repository.get_all()
-    response_data = [LessonSchema.model_validate(l).model_dump() for l in lesson_list]
+    user_id = 1
+    if user_id:
+        lesson_list = await repository.get_lessons_with_user_results(user_id=user_id)
+        response_data = [
+            LessonWithResultSchema.model_validate(l).model_dump() for l in lesson_list
+        ]
+    else:
+        lesson_list = await repository.get_all()
+        response_data = [
+            LessonSchema.model_validate(l).model_dump() for l in lesson_list
+        ]
 
     return JSONResponse(content=response_data, status_code=status.HTTP_200_OK)
 

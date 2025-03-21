@@ -8,7 +8,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.schemas import APIErrorMessage
 from src.users.repository import UsersRepository
-from src.users.schemas import AuthResponseSchema, UserSchema, CreateUserSchema
+from src.users.schemas import (
+    AuthRequestSchema,
+    SuccessAuthResponseSchema,
+    UserSchema,
+    CreateUserSchema,
+)
 import src.core.dependencies as core_deps
 from src.users.service import AuthService
 
@@ -97,7 +102,7 @@ async def delete_user_by_id(
 
 @auth_router.post(
     "/registration",
-    response_model=AuthResponseSchema,
+    response_model=SuccessAuthResponseSchema,
     responses={
         400: {"model": APIErrorMessage},
         500: {"model": APIErrorMessage},
@@ -113,7 +118,7 @@ async def registration(
     """Регистрация пользователя"""
 
     repository = UsersRepository(session=session)
-    service = AuthService(repo=repository)
+    service = AuthService(user_repo=repository)
     token = await service.register_user(request)
 
     return JSONResponse(content=token.model_dump(), status_code=status.HTTP_200_OK)
@@ -121,14 +126,14 @@ async def registration(
 
 @auth_router.post(
     "/login",
-    response_model=AuthResponseSchema,
+    response_model=SuccessAuthResponseSchema,
     responses={
         400: {"model": APIErrorMessage},
         500: {"model": APIErrorMessage},
     },
 )
 async def login(
-    request: CreateUserSchema,
+    request: AuthRequestSchema,
     session: Annotated[
         AsyncSession,
         Depends(core_deps.get_session),
@@ -137,7 +142,7 @@ async def login(
     """Авторизация пользователя"""
 
     repository = UsersRepository(session=session)
-    service = AuthService(repo=repository)
+    service = AuthService(user_repo=repository)
     token = await service.auth_user(request)
 
     return JSONResponse(content=token.model_dump(), status_code=status.HTTP_200_OK)

@@ -25,6 +25,8 @@ sqlalchemy = "^2.0.39"
 alembic = "^1.15.1"
 asyncpg = "^0.30.0"
 sqladmin = "^0.20.1"
+passlib = "^1.7.4"
+python-jose = "^3.4.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"

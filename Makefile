@@ -28,6 +28,9 @@ docker-makemigrations:
 docker-migrate:
 	docker compose exec api /bin/bash -c "alembic upgrade head"
 
+docker-exec-tests:
+	docker compose exec api /bin/bash -c "pytest"
+
 # dev 
 
 python-dev: 

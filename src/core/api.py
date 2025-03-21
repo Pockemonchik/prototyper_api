@@ -19,7 +19,15 @@ from src.core.errors import ResourceNotFoundError
 from src.core.logger import logger
 from src.database.db_manager import AsyncPostgresDatabaseManager
 from sqladmin import Admin
-from src.core.admin import LessonAdmin, UserAdmin
+from src.core.admin import (
+    LessonModelAdmin,
+    LessonResultModelAdmin,
+    LessonStepModelAdmin,
+    LessonStepResultModelAdmin,
+    LessonStepTextModelAdmin,
+    LessonStepTimingModelAdmin,
+    UserModelAdmin,
+)
 
 
 @asynccontextmanager
@@ -51,8 +59,15 @@ api.include_router(auth_router)
 admin = Admin(
     api, AsyncPostgresDatabaseManager(url=settings.settings.postgres_url).engine
 )
-admin.add_view(LessonAdmin)
-admin.add_view(UserAdmin)
+
+admin.add_view(UserModelAdmin)
+admin.add_view(LessonModelAdmin)
+admin.add_view(LessonResultModelAdmin)
+admin.add_view(LessonStepModelAdmin)
+admin.add_view(LessonStepTextModelAdmin)
+admin.add_view(LessonStepResultModelAdmin)
+admin.add_view(LessonStepTimingModelAdmin)
+
 
 Instrumentator().instrument(api).expose(api)
 
