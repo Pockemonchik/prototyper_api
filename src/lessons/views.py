@@ -7,11 +7,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from src.core.schemas import APIErrorMessage
-from src.lessons.repository import LessonsRepository
-from src.lessons.schemas import LessonSchema, LessonWithResultSchema
+from src.lessons.repository import LessonsRepository, LessonsStepRepository
+from src.lessons.schemas import LessonSchema, LessonStepSchema
 import src.core.dependencies as core_deps
 
-# import src.users.dependencies as users_deps
+import src.users.dependencies as users_deps
+from src.core.logger import logger
 
 router = APIRouter(
     prefix="/lessons",
@@ -33,24 +34,20 @@ async def get_lessons_list(
         AsyncSession,
         Depends(core_deps.get_session),
     ],
-    # user_id: Annotated[
-    #     int,
-    #     Depends(users_deps.get_current_user_id),
-    # ],
+    user_id: Annotated[
+        int,
+        Depends(users_deps.get_current_user_id_dep),
+    ],
 ) -> JSONResponse:
     """Получение списка уроков"""
     repository = LessonsRepository(session=session)
-    user_id = 1
+    logger.debug(f"dep user id = {user_id}")
     if user_id:
         lesson_list = await repository.get_lessons_with_user_results(user_id=user_id)
-        response_data = [
-            LessonWithResultSchema.model_validate(l).model_dump() for l in lesson_list
-        ]
+        response_data = [lesson.model_dump() for lesson in lesson_list]
     else:
         lesson_list = await repository.get_all()
-        response_data = [
-            LessonSchema.model_validate(l).model_dump() for l in lesson_list
-        ]
+        response_data = [lesson.model_dump() for lesson in lesson_list]
 
     return JSONResponse(content=response_data, status_code=status.HTTP_200_OK)
 
@@ -69,12 +66,19 @@ async def get_lesson_by_id(
         AsyncSession,
         Depends(core_deps.get_session),
     ],
+    user_id: Annotated[
+        int,
+        Depends(users_deps.get_current_user_id_dep),
+    ],
     id: int,
 ) -> JSONResponse:
     """Получение урока по id"""
 
     repository = LessonsRepository(session=session)
-    lesson = await repository.get_one(id=id)
+    lesson = await repository.get_lesson_with_steps(
+        user_id=user_id,
+        lesson_id=id,
+    )
     response_data = LessonSchema.model_validate(lesson).model_dump()
 
     return JSONResponse(content=response_data, status_code=status.HTTP_200_OK)
@@ -100,5 +104,33 @@ async def delete_lesson_by_id(
     repository = LessonsRepository(session=session)
     deleted_lesson_id = await repository.delete_one(id=id)
     response_data = {"deleted": deleted_lesson_id}
+
+    return JSONResponse(content=response_data, status_code=status.HTTP_200_OK)
+
+
+@router.get(
+    "/{id}/steps/{step_id}",
+    response_model=LessonSchema,
+    responses={
+        400: {"model": APIErrorMessage},
+        500: {"model": APIErrorMessage},
+    },
+)
+@cache(expire=100)
+async def get_lesson_step_by_id(
+    session: Annotated[
+        AsyncSession,
+        Depends(core_deps.get_session),
+    ],
+    id: int,
+    step_id: int,
+) -> JSONResponse:
+    """Получение урока по id"""
+
+    repository = LessonsStepRepository(session=session)
+    step = await repository.get_lesson_step_with_texts(
+        step_id=step_id,
+    )
+    response_data = LessonStepSchema.model_validate(step).model_dump()
 
     return JSONResponse(content=response_data, status_code=status.HTTP_200_OK)

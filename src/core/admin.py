@@ -16,11 +16,15 @@ class LessonModelAdmin(ModelView, model=LessonModel):
 
 
 class LessonResultModelAdmin(ModelView, model=LessonResultModel):
-    column_list = [LessonResultModel.id]
+    column_list = [
+        LessonResultModel.id,
+        LessonResultModel.user_id,
+        LessonResultModel.lesson_id,
+    ]
 
 
 class LessonStepModelAdmin(ModelView, model=LessonStepModel):
-    column_list = [LessonStepModel.id]
+    column_list = [LessonStepModel.id, LessonStepModel.lesson_id]
 
 
 class LessonStepTextModelAdmin(ModelView, model=LessonStepTextModel):
@@ -28,7 +32,11 @@ class LessonStepTextModelAdmin(ModelView, model=LessonStepTextModel):
 
 
 class LessonStepResultModelAdmin(ModelView, model=LessonStepResultModel):
-    column_list = [LessonStepResultModel.id]
+    column_list = [
+        LessonStepResultModel.id,
+        LessonStepResultModel.user_id,
+        LessonStepResultModel.lesson_step_id,
+    ]
 
 
 class LessonStepTimingModelAdmin(ModelView, model=LessonStepTimingModel):

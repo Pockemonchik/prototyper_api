@@ -1,15 +1,39 @@
+from typing import List
 from pydantic import BaseModel, ConfigDict
 
-# ------------ lesson -------------------
+# ------------ lesson step -------------------
 
 
-class LessonSchema(BaseModel):
+class LessonStepResultSchema(BaseModel):
+    id: int
+    lesson_step_id: int
+    user_id: int
+    percentage: int | None = None
+    status: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LessonStepSchema(BaseModel):
     id: int
     name: str | None = None
     description: str | None = None
-    language: str | None = None
+    texts: List[str] | None = None
+    result: LessonStepResultSchema | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class CreateLessonStepSchema(BaseModel):
+    name: str | None = None
+
+
+class UpdateLessonStepSchema(BaseModel):
+    id: int
+    name: str | None = None
+
+
+# ------------ lesson -------------------
 
 
 class LessonResultSchema(BaseModel):
@@ -19,6 +43,16 @@ class LessonResultSchema(BaseModel):
     percentage: int | None = None
     status: str | None = None
 
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LessonSchema(BaseModel):
+    id: int
+    name: str | None = None
+    description: str | None = None
+    language: str | None = None
+    result: LessonResultSchema | None = None
+    steps: List[LessonStepSchema] | None = None
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -33,25 +67,3 @@ class CreateLessonSchema(BaseModel):
     name: str
     description: str | None = None
     language: str | None = None
-
-
-# ------------ lesson step -------------------
-
-
-class LessonStepSchema(BaseModel):
-    id: int
-    name: str | None = None
-    description: str | None = None
-    language: str | None = None
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-# ------------ lesson with adds -------------------
-
-
-class LessonWithResultSchema(LessonSchema):
-
-    result: LessonResultSchema
-
-    model_config = ConfigDict(from_attributes=True)

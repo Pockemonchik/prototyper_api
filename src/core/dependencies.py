@@ -4,7 +4,10 @@ from src.core.settings import settings, redis_settings
 from src.database.db_manager import AsyncPostgresDatabaseManager
 
 
-get_session = AsyncPostgresDatabaseManager(url=settings.postgres_url).get_async_session
+get_session = AsyncPostgresDatabaseManager(
+    url=settings.postgres_url,
+    echo=settings.postgres_echo,
+).get_async_session
 
 
 async def get_cache():

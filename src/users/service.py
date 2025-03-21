@@ -79,7 +79,7 @@ class AuthService:
         if not user_id:
             raise AuthError("Не найден ID пользователя")
 
-        return user_id
+        return int(user_id)
 
     async def auth_user(self, creds: AuthRequestSchema) -> SuccessAuthResponseSchema:
         """Авторизация пользователя"""
