@@ -11,11 +11,13 @@ from src.users.repository import UsersRepository
 from src.users.schemas import (
     AuthRequestSchema,
     SuccessAuthResponseSchema,
+    UserProfileSchema,
     UserSchema,
     CreateUserSchema,
 )
 import src.core.dependencies as core_deps
 from src.users.service import AuthService
+import src.users.dependencies as users_deps
 
 users_router = APIRouter(
     prefix="/users",
@@ -26,6 +28,35 @@ auth_router = APIRouter(
     prefix="/auth",
     tags=["auth"],
 )
+
+
+@users_router.get(
+    "/profile",
+    response_model=UserSchema,
+    responses={
+        400: {"model": APIErrorMessage},
+        500: {"model": APIErrorMessage},
+    },
+    dependencies=[Depends(users_deps.get_token_dep)],
+)
+@cache(expire=100)
+async def get_user_profile(
+    session: Annotated[
+        AsyncSession,
+        Depends(core_deps.get_session),
+    ],
+    user_id: Annotated[
+        int,
+        Depends(users_deps.get_current_user_id_dep),
+    ],
+) -> JSONResponse:
+    """Получение профиля авторизованного пользователя"""
+
+    repository = UsersRepository(session=session)
+    user = await repository.get_one(id=user_id)
+    response_data = UserProfileSchema.model_validate(user).model_dump()
+
+    return JSONResponse(content=response_data, status_code=status.HTTP_200_OK)
 
 
 @users_router.get(

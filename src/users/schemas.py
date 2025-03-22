@@ -9,6 +9,13 @@ class UserSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserProfileSchema(BaseModel):
+    id: int
+    username: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class UpdateUserSchema(BaseModel):
     id: int
     username: str | None = None
@@ -22,8 +29,6 @@ class CreateUserSchema(BaseModel):
 
 class SuccessAuthResponseSchema(BaseModel):
     token: str
-    id: int
-    username: str
 
 
 class AuthRequestSchema(BaseModel):
