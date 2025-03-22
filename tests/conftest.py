@@ -4,11 +4,11 @@ from unittest import mock
 import pytest
 from fastapi.testclient import TestClient
 import pytest_asyncio
+from src.database.base_model import BaseSqlAchemyModel
 from src.database.db_manager import AsyncPostgresDatabaseManager
 from src.core.dependencies import get_session
 from sqlalchemy import text
-from alembic.config import Config
-from alembic import command
+from src.core.logger import logger
 
 
 def mock_cache(*args, **kwargs):
@@ -42,29 +42,29 @@ def test_client() -> TestClient:
     return TestClient(api)
 
 
-def run_migrations(connection) -> None:
-    print(f"Running DB migrations in {TEST_DB_URL}")
-    alembic_cfg = Config()
-    alembic_cfg.set_main_option("script_location", "src/database/migrations")
-    alembic_cfg.set_main_option("sqlalchemy.url", TEST_DB_URL)
-    alembic_cfg.attributes["connection"] = connection
-    command.upgrade(alembic_cfg, "head")
+# def run_migrations(connection) -> None:
+#     logger.debug(f"Running DB migrations in {TEST_DB_URL}")
+#     alembic_cfg = Config()
+#     alembic_cfg.set_main_option("script_location", "src/database/migrations")
+#     alembic_cfg.set_main_option("sqlalchemy.url", TEST_DB_URL)
+#     alembic_cfg.attributes["connection"] = connection
+#     command.upgrade(alembic_cfg, "head")
 
 
-@pytest_asyncio.fixture(autouse=True)
-async def migrate():
-    engine = AsyncPostgresDatabaseManager(
-        url=TEST_DB_URL,
-        echo=True,
-    ).engine
-    async with engine.begin() as conn:
-        await conn.run_sync(run_migrations)
-    yield
+# @pytest_asyncio.fixture(autouse=True)
+# async def migrate():
+#     engine = AsyncPostgresDatabaseManager(
+#         url=TEST_DB_URL,
+#         echo=True,
+#     ).engine
+#     async with engine.begin() as conn:
+#         await conn.run_sync(run_migrations)
+#     yield
 
 
 @pytest_asyncio.fixture()
 async def fake_db_create():
-    print(f"Database {TEST_DB_NAME} create start")
+    logger.debug(f"Database {TEST_DB_NAME} create start")
     engine = AsyncPostgresDatabaseManager(
         url=TEST_DB_URL,
         echo=True,
@@ -73,10 +73,10 @@ async def fake_db_create():
     try:
         conn = await engine.connect()
         await conn.close()
-        print(f"Database {TEST_DB_NAME} exist")
+        logger.debug(f"Database {TEST_DB_NAME} exist")
     except Exception as exc:
         if "does not exist" in exc.__str__():
-            print(f"Database {TEST_DB_NAME} NOT exist!")
+            logger.debug(f"Database {TEST_DB_NAME} NOT exist!")
             engine = AsyncPostgresDatabaseManager(
                 url=TEST_DB_URL.replace(TEST_DB_NAME, ""),
                 echo=True,
@@ -85,9 +85,20 @@ async def fake_db_create():
                 await conn.execute(text("COMMIT"))
                 await conn.execute(text(f"CREATE DATABASE {TEST_DB_NAME}"))  # type: ignore
 
-            print(f"Database {TEST_DB_NAME} created")
+            logger.debug(f"Database {TEST_DB_NAME} created")
 
         else:
             raise exc
 
-    yield
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(BaseSqlAchemyModel.metadata.create_all)
+            await engine.dispose()
+            yield
+    except Exception as e:
+        logger.error(f"err migrate {e}")
+        raise e
+    # TODO проверить работу
+    # async with engine.begin() as conn:
+    #     await conn.run_sync(BaseSqlAchemyModel.metadata.drop_all)
+    #     await engine.dispose()
