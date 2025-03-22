@@ -10,6 +10,8 @@ from src.core.logger import logger
 
 
 class AsyncPostgresDatabaseManager:
+    """Менеджер по работе с бд"""
+
     def __init__(self, url: str, echo: bool = False):
         try:
             self.engine = create_async_engine(
@@ -29,3 +31,5 @@ class AsyncPostgresDatabaseManager:
     async def get_async_session(self) -> AsyncGenerator[AsyncSession, None]:
         async with self.session_factory() as session:
             yield session
+            logger.debug("session close")
+            await session.close()

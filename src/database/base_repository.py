@@ -62,9 +62,8 @@ class BaseSqlAlchemyRepository(metaclass=RepoTypeCheckedMeta):
     async def get_one(self, id: int) -> entity_schema:
         """Получение объекта по id"""
         obj = await self.session.get(self.model, id)
-        await self.session.commit()
         if obj == None:
-            await self.session.close()
+
             raise ResourceNotFoundError(
                 (
                     f"Not fond {self.model.__class__.__name__}\
@@ -72,14 +71,13 @@ class BaseSqlAlchemyRepository(metaclass=RepoTypeCheckedMeta):
                 )
             )
         else:
-            await self.session.close()
             return self.entity_schema.model_validate(obj)
 
     async def get_all(self) -> List[entity_schema]:
         """Получение всех объектов"""
         stmt = select(self.model)
         obj_list = await self.session.execute(stmt)
-        await self.session.close()
+
         result = [
             self.entity_schema.model_validate(l) for l in obj_list.scalars().all()
         ]
@@ -90,14 +88,13 @@ class BaseSqlAlchemyRepository(metaclass=RepoTypeCheckedMeta):
         new_object = self.model(**new_entity.model_dump())
         self.session.add(new_object)
         await self.session.commit()
-        await self.session.close()
         return self.entity_schema.model_validate(new_object)
 
     async def update_one(self, id: int, update_entity: update_schema) -> entity_schema:
         """Обновление объекта"""
         obj = await self.session.get(self.model, id)
         if obj == None:
-            await self.session.close()
+
             raise ResourceNotFoundError(
                 (
                     f"Not fond {self.model.__class__.__name__}\
@@ -108,7 +105,7 @@ class BaseSqlAlchemyRepository(metaclass=RepoTypeCheckedMeta):
             for name, value in update_entity.model_dump().items():
                 setattr(obj, name, value)
             await self.session.commit()
-            await self.session.close()
+
             return self.entity_schema.model_validate(obj)
 
     async def delete_one(self, id: int) -> int:
@@ -116,7 +113,7 @@ class BaseSqlAlchemyRepository(metaclass=RepoTypeCheckedMeta):
         obj = await self.session.get(self.model, id)
         await self.session.commit()
         if obj == None:
-            await self.session.close()
+
             raise ResourceNotFoundError(
                 (
                     f"Not fond {self.model.__class__.__name__}\
@@ -126,7 +123,7 @@ class BaseSqlAlchemyRepository(metaclass=RepoTypeCheckedMeta):
         else:
             await self.session.delete(obj)
             await self.session.commit()
-            await self.session.close()
+
             return id
 
     async def filter_by_field(self, **kwargs) -> List[entity_schema]:
@@ -137,6 +134,5 @@ class BaseSqlAlchemyRepository(metaclass=RepoTypeCheckedMeta):
                 filters.append(getattr(self.model, key) == value)
         stmt = select(self.model).filter(*filters)
         obj = await self.session.execute(stmt)
-        await self.session.commit()
         result = [self.entity_schema.model_validate(l) for l in obj.scalars().all()]
         return list(result)

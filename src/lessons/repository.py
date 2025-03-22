@@ -14,8 +14,10 @@ from sqlalchemy.orm import joinedload
 from src.lessons.schemas import (
     CreateLessonSchema,
     CreateLessonStepSchema,
+    LessonBaseSchema,
     LessonResultSchema,
     LessonSchema,
+    LessonStepBaseSchema,
     LessonStepResultSchema,
     LessonStepSchema,
     UpdateLessonSchema,
@@ -25,17 +27,23 @@ from src.lessons.schemas import (
 
 class LessonsRepository(BaseSqlAlchemyRepository):
     model = LessonModel
-    entity_schema = LessonSchema
+    entity_schema = LessonBaseSchema
     create_schema = CreateLessonSchema
     update_schema = UpdateLessonSchema
 
-    async def get_lessons_with_user_results(self, user_id: int) -> List[LessonSchema]:
+    async def get_all_lessons_with_user_results(
+        self, user_id: int
+    ) -> List[LessonSchema]:
         """Получение всех уроков с результатами пользователя"""
-        stmt = select(self.model).options(
-            joinedload(self.model.results.and_(LessonResultModel.user_id == user_id))
-        )
+        if user_id:
+            stmt = select(self.model).options(
+                joinedload(
+                    self.model.results.and_(LessonResultModel.user_id == user_id)
+                )
+            )
+        else:
+            stmt = select(self.model)
         obj_list = await self.session.execute(stmt)
-        await self.session.close()
 
         result = [
             LessonSchema.model_validate(
@@ -43,7 +51,7 @@ class LessonsRepository(BaseSqlAlchemyRepository):
                     **l.__dict__,
                     "result": (
                         LessonResultSchema.model_validate(l.results[0])
-                        if l.results
+                        if user_id and l.results
                         else None
                     ),
                 }
@@ -53,7 +61,7 @@ class LessonsRepository(BaseSqlAlchemyRepository):
 
         return result
 
-    async def get_lesson_with_steps(
+    async def get_one_lesson_with_steps(
         self, lesson_id: int, user_id: int | None
     ) -> LessonSchema:
         """Получение урока с этапами и их результатми"""
@@ -81,7 +89,6 @@ class LessonsRepository(BaseSqlAlchemyRepository):
             )
 
         obj_list = await self.session.execute(stmt)
-        await self.session.close()
 
         query_result = obj_list.unique().scalars().all()
         if query_result:
@@ -94,7 +101,7 @@ class LessonsRepository(BaseSqlAlchemyRepository):
                 **lesson.__dict__,
                 "result": (
                     LessonResultSchema.model_validate(lesson.results[0])
-                    if lesson.results
+                    if user_id and lesson.results
                     else None
                 ),
                 "steps": [
@@ -103,7 +110,7 @@ class LessonsRepository(BaseSqlAlchemyRepository):
                             **step.__dict__,
                             "result": (
                                 LessonStepResultSchema.model_validate(step.results[0])
-                                if step.results
+                                if user_id and step.results
                                 else None
                             ),
                         }
@@ -118,7 +125,7 @@ class LessonsRepository(BaseSqlAlchemyRepository):
 
 class LessonsStepRepository(BaseSqlAlchemyRepository):
     model = LessonStepModel
-    entity_schema = LessonStepSchema
+    entity_schema = LessonStepBaseSchema
     create_schema = CreateLessonStepSchema
     update_schema = UpdateLessonStepSchema
 
@@ -130,7 +137,6 @@ class LessonsStepRepository(BaseSqlAlchemyRepository):
             .where(self.model.id == step_id)
         )
         obj_list = await self.session.execute(stmt)
-        await self.session.close()
 
         query_result = obj_list.unique().scalars().all()
 

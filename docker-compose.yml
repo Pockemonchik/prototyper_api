@@ -65,6 +65,7 @@ services:
                 -c checkpoint_completion_target=0.7
                 -c wal_buffers=16MB
                 -c default_statistics_target=100
+                
   redis:
     image: redis
     container_name: redis

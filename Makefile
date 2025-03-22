@@ -29,7 +29,7 @@ docker-migrate:
 	docker compose exec api /bin/bash -c "alembic upgrade head"
 
 docker-exec-tests:
-	docker compose exec api /bin/bash -c "pytest"
+	docker compose exec api /bin/bash -c "pytest -s"
 
 # dev 
 

@@ -1,6 +1,11 @@
 from typing import List
 from pydantic import BaseModel, ConfigDict
 
+
+# EntityNameBaseShema - с полями без связанных сущностей,
+# для того чтобы исключить lazy load и работали базовые методы Repository
+
+
 # ------------ lesson step -------------------
 
 
@@ -14,10 +19,16 @@ class LessonStepResultSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class LessonStepSchema(BaseModel):
+class LessonStepBaseSchema(BaseModel):
     id: int
     name: str | None = None
     description: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LessonStepSchema(LessonStepBaseSchema):
+
     texts: List[str] | None = None
     result: LessonStepResultSchema | None = None
 
@@ -46,13 +57,20 @@ class LessonResultSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class LessonSchema(BaseModel):
+class LessonBaseSchema(BaseModel):
     id: int
     name: str | None = None
     description: str | None = None
     language: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LessonSchema(LessonBaseSchema):
+
     result: LessonResultSchema | None = None
     steps: List[LessonStepSchema] | None = None
+
     model_config = ConfigDict(from_attributes=True)
 
 

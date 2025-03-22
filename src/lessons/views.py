@@ -40,14 +40,11 @@ async def get_lessons_list(
     ],
 ) -> JSONResponse:
     """Получение списка уроков"""
+    logger.debug("get_lessons_list user_id={user_id}")
     repository = LessonsRepository(session=session)
-    logger.debug(f"dep user id = {user_id}")
-    if user_id:
-        lesson_list = await repository.get_lessons_with_user_results(user_id=user_id)
-        response_data = [lesson.model_dump() for lesson in lesson_list]
-    else:
-        lesson_list = await repository.get_all()
-        response_data = [lesson.model_dump() for lesson in lesson_list]
+    lesson_list = await repository.get_all()
+    lesson_list = await repository.get_all_lessons_with_user_results(user_id=user_id)
+    response_data = [lesson.model_dump() for lesson in lesson_list]
 
     return JSONResponse(content=response_data, status_code=status.HTTP_200_OK)
 
@@ -73,14 +70,13 @@ async def get_lesson_by_id(
     id: int,
 ) -> JSONResponse:
     """Получение урока по id"""
-
+    logger.debug("get_lesson_by_id user_id={user_id}")
     repository = LessonsRepository(session=session)
-    lesson = await repository.get_lesson_with_steps(
+    lesson = await repository.get_one_lesson_with_steps(
         user_id=user_id,
         lesson_id=id,
     )
     response_data = LessonSchema.model_validate(lesson).model_dump()
-
     return JSONResponse(content=response_data, status_code=status.HTTP_200_OK)
 
 
@@ -100,7 +96,7 @@ async def delete_lesson_by_id(
     id: int,
 ) -> JSONResponse:
     """Удаление урока по id"""
-
+    logger.debug("delete_lesson_by_id")
     repository = LessonsRepository(session=session)
     deleted_lesson_id = await repository.delete_one(id=id)
     response_data = {"deleted": deleted_lesson_id}
@@ -126,7 +122,7 @@ async def get_lesson_step_by_id(
     step_id: int,
 ) -> JSONResponse:
     """Получение урока по id"""
-
+    logger.debug("get_lesson_step_by_id  user_id={user_id} step_id={step_id} ")
     repository = LessonsStepRepository(session=session)
     step = await repository.get_lesson_step_with_texts(
         step_id=step_id,
