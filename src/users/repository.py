@@ -1,8 +1,6 @@
 from src.database.base_repository import BaseSqlAlchemyRepository
 from src.users.models import UserModel
-
-
-from src.users.schemas import CreateUserSchema, UserSchema, UpdateUserSchema
+from src.users.schemas import CreateUserSchema, UpdateUserSchema, UserSchema
 
 
 class UsersRepository(BaseSqlAlchemyRepository):

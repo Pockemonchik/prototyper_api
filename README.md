@@ -73,6 +73,17 @@ sudo docker compose -f ./docker-compose.local-tests.yml up --build lint
 
 ```
 
+или локально через poetry:
+
+```
+poetry run isort .
+poetry run black .
+poetry run ruff check
+poetry run mypy .
+portru run flake8 ./src
+
+```
+
 Для Windows (docker desktop)
 
 ```

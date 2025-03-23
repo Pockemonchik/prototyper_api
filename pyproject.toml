@@ -12,21 +12,23 @@ fastapi = "^0.115.4"
 fastapi-cache2 = {extras = ["redis"], version = "^0.2.2"}
 
 aiohttp = "^3.11.12"
+alembic = "^1.15.1"
+asyncpg = "^0.30.0"
 gunicorn = "^23.0.0"
 httpx = "^0.28.1"
 loguru = "^0.7.2"
+passlib = "^1.7.4"
 prometheus-fastapi-instrumentator = "^7.0.0"
 pydantic = "^2.9.2"
 pydantic-settings = "^2.5.2"
 python = "^3.12"
-redis = "^4.2.0rc1"
-uvicorn = "^0.32.0"
-sqlalchemy = "^2.0.39"
-alembic = "^1.15.1"
-asyncpg = "^0.30.0"
-sqladmin = "^0.20.1"
-passlib = "^1.7.4"
 python-jose = "^3.4.0"
+redis = "^4.2.0rc1"
+sqladmin = "^0.20.1"
+sqlalchemy = "^2.0.39"
+types-passlib = "^1.7.7.20250322"
+types-python-jose = "^3.4.0.20250224"
+uvicorn = "^0.32.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"
@@ -51,10 +53,13 @@ log_cli = true
 line-length = 120
 
 [tool.ruff.lint]
+exclude = [
+  "./src/database/migrations/*",
+]
 ignore = [
   "C901", # too complex
   "W191", # indentation contains tabs
-  "D401", # imperative mood
+  "B904", # raise from None
 ]
 select = [
   "E", # pycodestyle errors
@@ -64,7 +69,6 @@ select = [
   "B", # flake8-bugbear
   "C4", # flake8-comprehensions
   "N", # PEP8 naming convetions
-  "D", # pydocstyle
 ]
 
 [tool.ruff.lint.pydocstyle]
@@ -131,7 +135,7 @@ exclude = [
   '.git',
   '__pycache__',
   '__init__.py',
-  'nebula_orm',
+  './src/database/migrations/',
 ]
 ignore = ['E231', 'E241', 'W503']
 max-line-length = 88

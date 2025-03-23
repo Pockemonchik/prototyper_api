@@ -1,8 +1,8 @@
 import pytest
-from src.database.base_repository import BaseSqlAlchemyRepository
-
 from pydantic import BaseModel as BasePydanticModel
 
+from src.database.base_model import BaseSqlAlchemyModel
+from src.database.base_repository import BaseSqlAlchemyRepository
 from src.lessons.models import LessonModel
 from src.lessons.schemas import LessonSchema
 
@@ -14,17 +14,15 @@ def test_cant_create_invalid_repo():
         class TestRepo1(BaseSqlAlchemyRepository):
             pass
 
-        assert not TestRepo1
+        assert TestRepo1.model is BaseSqlAlchemyModel
 
     with pytest.raises(TypeError):
 
         class TestRepo2(BaseSqlAlchemyRepository):
             model = LessonModel
-            entity_schema = LessonModel
+            entity_schema = LessonModel  # type: ignore
             create_schema = BasePydanticModel
             update_schema = BasePydanticModel
-
-        assert not TestRepo2
 
 
 def test_can_create_repo():
@@ -35,4 +33,4 @@ def test_can_create_repo():
         create_schema = LessonSchema
         update_schema = LessonSchema
 
-    assert TestRepo2
+    assert TestRepo2.model is LessonModel

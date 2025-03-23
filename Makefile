@@ -9,6 +9,9 @@ isort:
 black:
 	poetry run black .
 
+ruff:
+	poetry run ruff check .
+
 docker-lint:
 	docker compose -f ./docker-compose.local-tests.yml up --build lint 
 

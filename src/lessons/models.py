@@ -1,15 +1,15 @@
 from typing import List
+
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.database.base_model import BaseSqlAchemyModel
+from src.database.base_model import BaseSqlAlchemyModel
 from src.users.models import UserModel
-
 
 # ------------ lesson -------------------
 
 
-class LessonModel(BaseSqlAchemyModel):
+class LessonModel(BaseSqlAlchemyModel):
     """Урок по обучению печати"""
 
     __tablename__ = "lessons"
@@ -23,7 +23,7 @@ class LessonModel(BaseSqlAchemyModel):
         return str(self.name)
 
 
-class LessonResultModel(BaseSqlAchemyModel):
+class LessonResultModel(BaseSqlAlchemyModel):
     """Результат прохождения урока пользователем"""
 
     __tablename__ = "lesson_results"
@@ -45,7 +45,7 @@ class LessonResultModel(BaseSqlAchemyModel):
 # ------------ lesson step -------------------
 
 
-class LessonStepModel(BaseSqlAchemyModel):
+class LessonStepModel(BaseSqlAlchemyModel):
     """Этап урока по обучению печати"""
 
     __tablename__ = "lesson_steps"
@@ -67,7 +67,7 @@ class LessonStepModel(BaseSqlAchemyModel):
         return str(self.name)
 
 
-class LessonStepTextModel(BaseSqlAchemyModel):
+class LessonStepTextModel(BaseSqlAlchemyModel):
     """Текст этапа урока"""
 
     __tablename__ = "lesson_step_texts"
@@ -80,7 +80,7 @@ class LessonStepTextModel(BaseSqlAchemyModel):
         return str(self.name)
 
 
-class LessonStepResultModel(BaseSqlAchemyModel):
+class LessonStepResultModel(BaseSqlAlchemyModel):
     """Результаты этапа урока"""
 
     __tablename__ = "lesson_step_results"
@@ -103,7 +103,7 @@ class LessonStepResultModel(BaseSqlAchemyModel):
         return f"{str(self.user_id,)} {self.status}"
 
 
-class LessonStepTimingModel(BaseSqlAchemyModel):
+class LessonStepTimingModel(BaseSqlAlchemyModel):
     """Временные результаты прохождения этапа урока"""
 
     __tablename__ = "lesson_step_timings"

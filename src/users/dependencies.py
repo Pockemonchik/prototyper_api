@@ -1,6 +1,9 @@
-from src.core.dependencies import get_session
-from fastapi import Request, HTTPException, status, Depends
+from typing import Annotated
 
+from fastapi import Depends, HTTPException, Request, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.core.dependencies import get_session
 from src.users.errors import AuthError
 from src.users.repository import UsersRepository
 from src.users.schemas import UserSchema
@@ -26,7 +29,8 @@ def get_token_or_none_dep(request: Request) -> str | None:
 
 
 async def check_auth_dep(
-    token: str = Depends(get_token_dep), session=Depends(get_session)
+    session: Annotated[AsyncSession, Depends(get_session)],
+    token: Annotated[str, Depends(get_token_dep)],
 ) -> UserSchema:
     """Проверка авторизации пользователя"""
     user_repo = UsersRepository(session=session)
@@ -48,7 +52,8 @@ async def check_auth_dep(
 
 
 async def get_current_user_id_dep(
-    token: str = Depends(get_token_or_none_dep), session=Depends(get_session)
+    token: Annotated[str, Depends(get_token_or_none_dep)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> int | None:
     """Получение id пользователя"""
     user_repo = UsersRepository(session=session)
@@ -58,5 +63,5 @@ async def get_current_user_id_dep(
     try:
         user_id = auth_service.check_access_token(token=token)
         return user_id
-    except AuthError as e:
+    except AuthError:
         return None

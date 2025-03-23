@@ -1,6 +1,6 @@
 from typing import List
-from pydantic import BaseModel, ConfigDict
 
+from pydantic import BaseModel, ConfigDict
 
 # EntityNameBaseShema - с полями без связанных сущностей,
 # для того чтобы исключить lazy load и работали базовые методы Repository

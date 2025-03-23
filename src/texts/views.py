@@ -2,7 +2,6 @@ from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 from fastapi_cache.decorator import cache
 
-
 from src.core.schemas import APIErrorMessage
 
 router = APIRouter(
@@ -22,7 +21,6 @@ router = APIRouter(
 @cache(expire=1)
 async def get_text() -> JSONResponse:
     """Получение текста"""
-
     response_data = {
         "id": 1,
         "text": """Lorem ipsum dolor sit amet, consectetur adipiscing elit""",

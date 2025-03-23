@@ -1,17 +1,14 @@
-from sqlalchemy.orm import Mapped
-
-from src.database.base_model import BaseSqlAchemyModel
 from typing import TYPE_CHECKING, List
 
 from sqlalchemy.orm import Mapped, relationship
 
+from src.database.base_model import BaseSqlAlchemyModel
 
 if TYPE_CHECKING:
-    from src.lessons.models import LessonResultModel
-    from src.lessons.models import LessonStepResultModel
+    from src.lessons.models import LessonResultModel, LessonStepResultModel
 
 
-class UserModel(BaseSqlAchemyModel):
+class UserModel(BaseSqlAlchemyModel):
     __tablename__ = "users"
     username: Mapped[str]
     password: Mapped[str]

@@ -1,4 +1,8 @@
 from typing import List
+
+from sqlalchemy import select
+from sqlalchemy.orm import joinedload
+
 from src.core.errors import ResourceNotFoundError
 from src.database.base_repository import BaseSqlAlchemyRepository
 from src.lessons.models import (
@@ -7,10 +11,6 @@ from src.lessons.models import (
     LessonStepModel,
     LessonStepResultModel,
 )
-from sqlalchemy import select
-from sqlalchemy.orm import joinedload
-
-
 from src.lessons.schemas import (
     CreateLessonSchema,
     CreateLessonStepSchema,
@@ -48,15 +48,15 @@ class LessonsRepository(BaseSqlAlchemyRepository):
         result = [
             LessonSchema.model_validate(
                 {
-                    **l.__dict__,
+                    **lesson.__dict__,
                     "result": (
-                        LessonResultSchema.model_validate(l.results[0])
-                        if user_id and l.results
+                        LessonResultSchema.model_validate(lesson.results[0])
+                        if user_id and lesson.results
                         else None
                     ),
                 }
             )
-            for l in obj_list.unique().scalars().all()
+            for lesson in obj_list.unique().scalars().all()
         ]
 
         return result
@@ -65,7 +65,6 @@ class LessonsRepository(BaseSqlAlchemyRepository):
         self, lesson_id: int, user_id: int | None
     ) -> LessonSchema:
         """Получение урока с этапами и их результатми"""
-
         if user_id:
             stmt = (
                 select(self.model)

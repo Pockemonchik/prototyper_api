@@ -5,14 +5,12 @@ from fastapi.responses import JSONResponse
 from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
+import src.core.dependencies as core_deps
+import src.users.dependencies as users_deps
+from src.core.logger import logger
 from src.core.schemas import APIErrorMessage
 from src.lessons.repository import LessonsRepository, LessonsStepRepository
 from src.lessons.schemas import LessonSchema, LessonStepSchema
-import src.core.dependencies as core_deps
-
-import src.users.dependencies as users_deps
-from src.core.logger import logger
 
 router = APIRouter(
     prefix="/lessons",
@@ -42,7 +40,6 @@ async def get_lessons_list(
     """Получение списка уроков"""
     logger.debug("get_lessons_list user_id={user_id}")
     repository = LessonsRepository(session=session)
-    lesson_list = await repository.get_all()
     lesson_list = await repository.get_all_lessons_with_user_results(user_id=user_id)
     response_data = [lesson.model_dump() for lesson in lesson_list]
 

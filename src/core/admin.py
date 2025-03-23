@@ -4,8 +4,8 @@ from src.lessons.models import (
     LessonModel,
     LessonResultModel,
     LessonStepModel,
-    LessonStepTextModel,
     LessonStepResultModel,
+    LessonStepTextModel,
     LessonStepTimingModel,
 )
 from src.users.models import UserModel

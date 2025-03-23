@@ -1,15 +1,16 @@
-from src.users.errors import AuthError, UserError
-from src.users.repository import UsersRepository
-from src.users.schemas import (
-    CreateUserSchema,
-    SuccessAuthResponseSchema,
-    AuthRequestSchema,
-)
 import os
 from datetime import datetime, timedelta, timezone
 
-from jose import jwt, JWTError
+from jose import JWTError, jwt
 from passlib.context import CryptContext
+
+from src.users.errors import AuthError, UserError
+from src.users.repository import UsersRepository
+from src.users.schemas import (
+    AuthRequestSchema,
+    CreateUserSchema,
+    SuccessAuthResponseSchema,
+)
 
 
 class AuthService:
@@ -17,12 +18,16 @@ class AuthService:
         self,
         user_repo: UsersRepository,
     ) -> None:
+        """Init AuthService
+
+        Args:
+            user_repo (UsersRepository): для получения данных users из БД
+        """
         self.user_repo = user_repo
 
     @staticmethod
-    def get_auth_config() -> dict:
+    def get_auth_config() -> dict[str, str]:
         """Получение конфиков для создания и проверки токенов"""
-
         auth_data = {
             "secret_key": os.environ.get(
                 "SECRET_KEY",
@@ -37,11 +42,11 @@ class AuthService:
         return auth_data
 
     @staticmethod
-    def create_access_token(data: dict) -> str:
+    def create_access_token(data: dict[str, str]) -> str:
         """Создание токена"""
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + timedelta(days=30)
-        to_encode.update({"exp": expire})
+        to_encode.update({"exp": expire})  # type: ignore
         auth_data = AuthService.get_auth_config()
         encode_jwt = jwt.encode(
             to_encode, auth_data["secret_key"], algorithm=auth_data["algorithm"]
@@ -71,7 +76,10 @@ class AuthService:
             raise AuthError("Токен не валидный!")
 
         expire = payload.get("exp")
-        expire_time = datetime.fromtimestamp(int(expire), tz=timezone.utc)  # type: ignore
+        expire_time = datetime.fromtimestamp(
+            int(expire),  # type: ignore
+            tz=timezone.utc,
+        )
         if (not expire) or (expire_time < datetime.now(timezone.utc)):
             raise AuthError("Токен истек")
 

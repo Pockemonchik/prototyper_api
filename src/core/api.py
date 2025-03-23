@@ -8,17 +8,10 @@ from fastapi.responses import JSONResponse
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from prometheus_fastapi_instrumentator import Instrumentator
-from redis import asyncio as aioredis  # type: ignore
-
-from src.lessons.views import router as lessons_router
-from src.texts.views import router as texts_router
-from src.users.views import users_router, auth_router
-from src.core.schemas import APIErrorMessage
-from src.core import settings
-from src.core.errors import ResourceNotFoundError
-from src.core.logger import logger
-from src.database.db_manager import AsyncPostgresDatabaseManager
 from sqladmin import Admin
+
+from redis import asyncio as aioredis  # type: ignore
+from src.core import settings
 from src.core.admin import (
     LessonModelAdmin,
     LessonResultModelAdmin,
@@ -28,6 +21,13 @@ from src.core.admin import (
     LessonStepTimingModelAdmin,
     UserModelAdmin,
 )
+from src.core.errors import ResourceNotFoundError
+from src.core.logger import logger
+from src.core.schemas import APIErrorMessage
+from src.database.db_manager import AsyncPostgresDatabaseManager
+from src.lessons.views import router as lessons_router
+from src.texts.views import router as texts_router
+from src.users.views import auth_router, users_router
 
 
 @asynccontextmanager

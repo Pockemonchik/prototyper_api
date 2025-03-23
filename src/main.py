@@ -2,10 +2,8 @@ import asyncio
 
 import uvicorn
 
-
-from src.core.logger import logger
-
 from src.core.api import api
+from src.core.logger import logger
 
 app = api
 

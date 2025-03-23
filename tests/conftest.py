@@ -2,13 +2,14 @@ from functools import wraps
 from unittest import mock
 
 import pytest
-from fastapi.testclient import TestClient
 import pytest_asyncio
-from src.database.base_model import BaseSqlAchemyModel
-from src.database.db_manager import AsyncPostgresDatabaseManager
-from src.core.dependencies import get_session
+from fastapi.testclient import TestClient
 from sqlalchemy import text
+
+from src.core.dependencies import get_session
 from src.core.logger import logger
+from src.database.base_model import BaseSqlAlchemyModel
+from src.database.db_manager import AsyncPostgresDatabaseManager
 
 
 def mock_cache(*args, **kwargs):
@@ -92,7 +93,7 @@ async def fake_db_create():
 
     try:
         async with engine.begin() as conn:
-            await conn.run_sync(BaseSqlAchemyModel.metadata.create_all)
+            await conn.run_sync(BaseSqlAlchemyModel.metadata.create_all)
             await engine.dispose()
             yield
     except Exception as e:
@@ -100,5 +101,5 @@ async def fake_db_create():
         raise e
     # TODO проверить работу
     # async with engine.begin() as conn:
-    #     await conn.run_sync(BaseSqlAchemyModel.metadata.drop_all)
+    #     await conn.run_sync(BaseSqlAlchemyModel.metadata.drop_all)
     #     await engine.dispose()
