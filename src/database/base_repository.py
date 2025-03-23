@@ -1,4 +1,4 @@
-from typing import ClassVar, List
+from typing import List
 
 from pydantic import BaseModel as BasePydanticModel
 from sqlalchemy import select
@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.errors import ResourceNotFoundError
 from src.database.base_model import BaseSqlAlchemyModel
+from src.database.base_schemas import DbEntityBaseSchema
 
 
 class RepoTypeCheckedMeta(type):
@@ -46,12 +47,12 @@ class RepoTypeCheckedMeta(type):
 
 
 class BaseSqlAlchemyRepository(metaclass=RepoTypeCheckedMeta):
-    """Базовый класс для crud операций sqlalchemy"""
+    """Базовый класс для crud операций с моделью sqlalchemy"""
 
-    model: ClassVar[type[BaseSqlAlchemyModel]] = BaseSqlAlchemyModel
-    entity_schema: ClassVar[type[BasePydanticModel]] = BasePydanticModel
-    create_schema: ClassVar[type[BasePydanticModel]] = BasePydanticModel
-    update_schema: ClassVar[type[BasePydanticModel]] = BasePydanticModel
+    model: type[BaseSqlAlchemyModel] = BaseSqlAlchemyModel
+    entity_schema: type[DbEntityBaseSchema] = DbEntityBaseSchema
+    create_schema: type[BasePydanticModel] = BasePydanticModel
+    update_schema: type[BasePydanticModel] = BasePydanticModel
 
     def __init__(self, session: AsyncSession):
         self.session = session
@@ -69,7 +70,7 @@ class BaseSqlAlchemyRepository(metaclass=RepoTypeCheckedMeta):
         else:
             return self.entity_schema.model_validate(obj)
 
-    async def get_all(self) -> List[BasePydanticModel]:
+    async def get_all(self) -> List[DbEntityBaseSchema]:
         """Получение всех объектов"""
         stmt = select(self.model)
         query_result = await self.session.execute(stmt)
@@ -80,7 +81,7 @@ class BaseSqlAlchemyRepository(metaclass=RepoTypeCheckedMeta):
         ]
         return result
 
-    async def add_one(self, new_entity: BasePydanticModel) -> BasePydanticModel:
+    async def add_one(self, new_entity: BasePydanticModel) -> DbEntityBaseSchema:
         """Добавление объекта"""
         new_object = self.model(**new_entity.model_dump())
         self.session.add(new_object)
@@ -89,7 +90,7 @@ class BaseSqlAlchemyRepository(metaclass=RepoTypeCheckedMeta):
 
     async def update_one(
         self, id: int, update_entity: BasePydanticModel
-    ) -> BasePydanticModel:
+    ) -> DbEntityBaseSchema:
         """Обновление объекта"""
         query_result = await self.session.get(self.model, id)
         if query_result is None:
@@ -122,7 +123,7 @@ class BaseSqlAlchemyRepository(metaclass=RepoTypeCheckedMeta):
             await self.session.commit()
             return id
 
-    async def filter_by_field(self, **kwargs) -> List[BasePydanticModel]:
+    async def filter_by_field(self, **kwargs) -> List[DbEntityBaseSchema]:
         """Фильтр любому полю"""
         filters = []
         for key, value in kwargs.items():

@@ -1,13 +1,11 @@
 from typing import Annotated
-
 from fastapi import Depends, HTTPException, Request, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.dependencies import get_session
 from src.users.errors import AuthError
 from src.users.repository import UsersRepository
-from src.users.schemas import UserSchema
 from src.users.service import AuthService
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def get_token_dep(request: Request) -> str:
@@ -28,10 +26,10 @@ def get_token_or_none_dep(request: Request) -> str | None:
     return token
 
 
-async def check_auth_dep(
+async def is_auth_dep(
     session: Annotated[AsyncSession, Depends(get_session)],
     token: Annotated[str, Depends(get_token_dep)],
-) -> UserSchema:
+) -> bool:
     """Проверка авторизации пользователя"""
     user_repo = UsersRepository(session=session)
     auth_service = AuthService(user_repo=user_repo)
@@ -48,7 +46,7 @@ async def check_auth_dep(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
         )
 
-    return user  # type: ignore
+    return True  # type: ignore
 
 
 async def get_current_user_id_dep(

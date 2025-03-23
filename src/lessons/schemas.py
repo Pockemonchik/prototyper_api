@@ -2,15 +2,19 @@ from typing import List
 
 from pydantic import BaseModel, ConfigDict
 
+from src.database.base_schemas import DbEntityBaseSchema
+
+# Сущности Schema - DTO модели для выдачи данных
+# Сущности Form - модели данных приходящих с фронта для выдачи данных
+
 # EntityNameBaseShema - с полями без связанных сущностей,
-# для того чтобы исключить lazy load и работали базовые методы Repository
+# (для того чтобы исключить lazy load и работали базовые методы Repository)
 
 
 # ------------ lesson step -------------------
 
 
-class LessonStepResultSchema(BaseModel):
-    id: int
+class LessonStepResultSchema(DbEntityBaseSchema):
     lesson_step_id: int
     user_id: int
     percentage: int | None = None
@@ -19,8 +23,26 @@ class LessonStepResultSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class LessonStepBaseSchema(BaseModel):
-    id: int
+class SetLessonStepResultForm(BaseModel):
+    percentage: int | None = None
+    status: str | None = None
+
+
+class CreateLessonStepResultSchema(BaseModel):
+    lesson_step_id: int
+    user_id: int
+    percentage: int | None = None
+    status: str | None = None
+
+
+class UpdateLessonStepResultSchema(BaseModel):
+    lesson_step_id: int | None = None
+    user_id: int | None = None
+    percentage: int | None = None
+    status: str | None = None
+
+
+class LessonStepBaseSchema(DbEntityBaseSchema):
     name: str | None = None
     description: str | None = None
 
@@ -39,16 +61,14 @@ class CreateLessonStepSchema(BaseModel):
     name: str | None = None
 
 
-class UpdateLessonStepSchema(BaseModel):
-    id: int
+class UpdateLessonStepSchema(DbEntityBaseSchema):
     name: str | None = None
 
 
 # ------------ lesson -------------------
 
 
-class LessonResultSchema(BaseModel):
-    id: int
+class LessonResultSchema(DbEntityBaseSchema):
     lesson_id: int
     user_id: int
     percentage: int | None = None
@@ -57,8 +77,7 @@ class LessonResultSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class LessonBaseSchema(BaseModel):
-    id: int
+class LessonBaseSchema(DbEntityBaseSchema):
     name: str | None = None
     description: str | None = None
     language: str | None = None
@@ -74,8 +93,7 @@ class LessonSchema(LessonBaseSchema):
     model_config = ConfigDict(from_attributes=True)
 
 
-class UpdateLessonSchema(BaseModel):
-    id: int
+class UpdateLessonSchema(DbEntityBaseSchema):
     name: str | None = None
     description: str | None = None
     language: str | None = None

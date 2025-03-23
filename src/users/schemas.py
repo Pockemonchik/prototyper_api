@@ -1,23 +1,22 @@
 from pydantic import BaseModel, ConfigDict
 
+from src.database.base_schemas import DbEntityBaseSchema
 
-class UserSchema(BaseModel):
-    id: int
+
+class UserSchema(DbEntityBaseSchema):
     username: str | None = None
     password: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserProfileSchema(BaseModel):
-    id: int
+class UserProfileSchema(DbEntityBaseSchema):
     username: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
 
-class UpdateUserSchema(BaseModel):
-    id: int
+class UpdateUserSchema(DbEntityBaseSchema):
     username: str | None = None
     password: str | None = None
 

@@ -13,6 +13,7 @@ from src.lessons.models import (
 )
 from src.lessons.schemas import (
     CreateLessonSchema,
+    CreateLessonStepResultSchema,
     CreateLessonStepSchema,
     LessonBaseSchema,
     LessonResultSchema,
@@ -21,30 +22,40 @@ from src.lessons.schemas import (
     LessonStepResultSchema,
     LessonStepSchema,
     UpdateLessonSchema,
+    UpdateLessonStepResultSchema,
     UpdateLessonStepSchema,
 )
 
 
 class LessonsRepository(BaseSqlAlchemyRepository):
-    model = LessonModel
+    """Репозиторий для управления данными об уроках"""
+
+    model: type[LessonModel] = LessonModel
     entity_schema = LessonBaseSchema
     create_schema = CreateLessonSchema
     update_schema = UpdateLessonSchema
+
+    async def get_all_lessons(self) -> List[LessonSchema]:
+        """Получение всех уроков"""
+
+        stmt = select(self.model)
+        obj_list = await self.session.execute(stmt)
+
+        result = [
+            LessonSchema.model_validate({**lesson.__dict__, "result": None})
+            for lesson in obj_list.unique().scalars().all()
+        ]
+
+        return result
 
     async def get_all_lessons_with_user_results(
         self, user_id: int
     ) -> List[LessonSchema]:
         """Получение всех уроков с результатами пользователя"""
-        if user_id:
-            stmt = select(self.model).options(
-                joinedload(
-                    self.model.results.and_(LessonResultModel.user_id == user_id)
-                )
-            )
-        else:
-            stmt = select(self.model)
+        stmt = select(self.model).options(
+            joinedload(self.model.results.and_(LessonResultModel.user_id == user_id))
+        )
         obj_list = await self.session.execute(stmt)
-
         result = [
             LessonSchema.model_validate(
                 {
@@ -123,7 +134,9 @@ class LessonsRepository(BaseSqlAlchemyRepository):
 
 
 class LessonsStepRepository(BaseSqlAlchemyRepository):
-    model = LessonStepModel
+    """Репозиторий для управления данными о шагах урока"""
+
+    model: type[LessonStepModel] = LessonStepModel
     entity_schema = LessonStepBaseSchema
     create_schema = CreateLessonStepSchema
     update_schema = UpdateLessonStepSchema
@@ -152,3 +165,12 @@ class LessonsStepRepository(BaseSqlAlchemyRepository):
         )
 
         return result
+
+
+class LessonsStepResultRepository(BaseSqlAlchemyRepository):
+    """Репозиторий для управления данными о рузультатах шага урока"""
+
+    model: type[LessonStepResultModel] = LessonStepResultModel
+    entity_schema = LessonStepResultSchema
+    create_schema = CreateLessonStepResultSchema
+    update_schema = UpdateLessonStepResultSchema
