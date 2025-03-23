@@ -4,13 +4,13 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from fastapi_cache.decorator import cache
 
-from src.database.base_schemas import DbEntityBaseSchema
 import src.lessons.dependencies as lessons_deps
-from src.lessons.service import LessonsService
 import src.users.dependencies as users_deps
 from src.core.logger import logger
 from src.core.schemas import APIErrorMessage
+from src.database.base_schemas import DbEntityBaseSchema
 from src.lessons.schemas import LessonSchema, LessonStepSchema, SetLessonStepResultForm
+from src.lessons.service import LessonsService
 
 router = APIRouter(
     prefix="/lessons",

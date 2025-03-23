@@ -1,11 +1,12 @@
 from typing import Annotated
+
 from fastapi import Depends, HTTPException, Request, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.dependencies import get_session
 from src.users.errors import AuthError
 from src.users.repository import UsersRepository
 from src.users.service import AuthService
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def get_token_dep(request: Request) -> str:
