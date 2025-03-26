@@ -1,15 +1,17 @@
 import os
 from datetime import datetime, timedelta, timezone
+from typing import List
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-from src.users.errors import AuthError, UserError
+from src.users.errors import AuthError
 from src.users.repository import UsersRepository
 from src.users.schemas import (
     AuthRequestSchema,
     CreateUserSchema,
     SuccessAuthResponseSchema,
+    UserSchema,
 )
 
 
@@ -94,14 +96,14 @@ class AuthService:
         users = await self.user_repo.filter_by_field(username=creds.username)
 
         if not users:
-            raise UserError("User with this username not found!")
+            raise AuthError("User with this username not found!")
         else:
             user = users[0]
         if not self.verify_password(
             plain_password=creds.password,
             hashed_password=user.password,  # type: ignore
         ):
-            raise UserError("Wrong password")
+            raise AuthError("Wrong password")
         access_token = self.create_access_token({"sub": str(user.id)})  # type: ignore
         return SuccessAuthResponseSchema(
             id=user.id,  # type: ignore
@@ -115,7 +117,7 @@ class AuthService:
         """Регистрация пользователя"""
         exist_user = await self.user_repo.filter_by_field(username=input_dto.username)
         if exist_user:
-            raise UserError("User with this username already exist!")
+            raise AuthError("User with this username already exist!")
 
         new_user = await self.user_repo.add_one(
             CreateUserSchema(
@@ -130,3 +132,28 @@ class AuthService:
             )
         )
         return auth_data
+
+
+class UsersService:
+    def __init__(
+        self,
+        user_repo: UsersRepository,
+    ) -> None:
+        """Init UsersService
+
+        Args:
+            user_repo (UsersRepository): для получения данных users из БД
+        """
+        self.user_repo = user_repo
+
+    async def get_users_list(self) -> List[UserSchema]:
+        result = await self.user_repo.get_all()
+        return result
+
+    async def get_user_by_id(self, id: int) -> UserSchema:
+        result = await self.user_repo.get_one(id=id)
+        return result
+
+    async def delete_user_by_id(self, id: int) -> int:
+        result = await self.user_repo.delete_one(id=id)
+        return result

@@ -11,6 +11,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from sqladmin import Admin
 
 from redis import asyncio as aioredis  # type: ignore
+from src.users.errors import AuthError
 from src.core import settings
 from src.core.admin import (
     LessonModelAdmin,
@@ -106,5 +107,20 @@ async def resource_not_found_error_handler(
     logger.error(exc)
     return JSONResponse(
         status_code=404,
+        content=error_msg.model_dump(),
+    )
+
+
+@api.exception_handler(AuthError)
+async def resource_not_found_error_handler(
+    request: Request, exc: AuthError
+) -> JSONResponse:
+    error_msg = APIErrorMessage(
+        type=exc.__class__.__name__,
+        message=f"{exc.args}",
+    )
+    logger.error(exc)
+    return JSONResponse(
+        status_code=401,
         content=error_msg.model_dump(),
     )

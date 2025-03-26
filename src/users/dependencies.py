@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.dependencies import get_session
 from src.users.errors import AuthError
 from src.users.repository import UsersRepository
-from src.users.service import AuthService
+from src.users.service import AuthService, UsersService
 
 
 def get_token_dep(request: Request) -> str:
@@ -64,3 +64,27 @@ async def get_current_user_id_dep(
         return user_id
     except AuthError:
         return None
+
+
+async def get_auth_service_dep(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> AuthService:
+    """Получение сервиса auth"""
+    users_repo = UsersRepository(session=session)
+
+    service = AuthService(
+        user_repo=users_repo,
+    )
+    return service
+
+
+async def get_users_service_dep(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> AuthService:
+    """Получение сервиса auth"""
+    users_repo = UsersRepository(session=session)
+
+    service = UsersService(
+        user_repo=users_repo,
+    )
+    return service
