@@ -11,7 +11,6 @@ from src.users.schemas import (
     CreateUserSchema,
     SuccessAuthResponseSchema,
     UserProfileSchema,
-    UserSchema,
 )
 from src.users.service import AuthService, UsersService
 

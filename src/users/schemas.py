@@ -6,12 +6,13 @@ from src.database.base_schemas import DbEntityBaseSchema
 class UserSchema(DbEntityBaseSchema):
     username: str | None = None
     password: str | None = None
+    is_admin: bool | None = None
     model_config = ConfigDict(from_attributes=True)
 
 
 class UserProfileSchema(DbEntityBaseSchema):
     username: str | None = None
-
+    is_admin: bool | None = None
     model_config = ConfigDict(from_attributes=True)
 
 

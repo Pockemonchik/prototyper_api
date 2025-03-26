@@ -88,13 +88,14 @@ class LessonsRepository(BaseSqlAlchemyRepository):
                             LessonStepResultModel.user_id == user_id
                         )
                     ),
+                    joinedload(self.model.steps).joinedload(LessonStepModel.texts),
                 )
                 .where(self.model.id == lesson_id)
             )
         else:
             stmt = (
                 select(self.model)
-                .options(joinedload(self.model.steps))
+                .options(joinedload(self.model.steps).joinedload(LessonStepModel.texts))
                 .where(self.model.id == lesson_id)
             )
 
@@ -118,6 +119,7 @@ class LessonsRepository(BaseSqlAlchemyRepository):
                     LessonStepSchema.model_validate(
                         {
                             **step.__dict__,
+                            "texts": [text.text for text in step.texts],
                             "result": (
                                 LessonStepResultSchema.model_validate(step.results[0])
                                 if user_id and step.results
