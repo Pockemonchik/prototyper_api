@@ -1,6 +1,7 @@
 from typing import List
+from datetime import datetime
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.base_model import BaseSqlAlchemyModel
@@ -85,6 +86,7 @@ class LessonStepResultModel(BaseSqlAlchemyModel):
 
     __tablename__ = "lesson_step_results"
     percentage: Mapped[int] = mapped_column(nullable=True)
+    wpm: Mapped[int] = mapped_column(nullable=True)
     status: Mapped[str] = mapped_column(
         nullable=True
     )  # success" | "fail" | "notchecked"
@@ -107,9 +109,8 @@ class LessonStepTimingModel(BaseSqlAlchemyModel):
     """Временные результаты прохождения этапа урока"""
 
     __tablename__ = "lesson_step_timings"
-    time: Mapped[str]
-    date: Mapped[str] = mapped_column(nullable=True)
-    level: Mapped[str] = mapped_column(nullable=True)
+    seconds: Mapped[int] = mapped_column(nullable=True)
+    created_date: Mapped[datetime] = mapped_column(server_default=func.now())
 
     lesson_step_result_id: Mapped[int] = mapped_column(
         ForeignKey("lesson_step_results.id")

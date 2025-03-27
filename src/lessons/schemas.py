@@ -19,6 +19,9 @@ class LessonStepResultSchema(DbEntityBaseSchema):
     user_id: int
     percentage: int | None = None
     status: str | None = None
+    wpm: int | None = None
+
+    timing_list: int | List[int] | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -26,6 +29,8 @@ class LessonStepResultSchema(DbEntityBaseSchema):
 class SetLessonStepResultForm(BaseModel):
     percentage: int | None = None
     status: str | None = None
+    wpm: int | None = None
+    timing: int | None = None
 
 
 class CreateLessonStepResultSchema(BaseModel):
@@ -33,6 +38,7 @@ class CreateLessonStepResultSchema(BaseModel):
     user_id: int
     percentage: int | None = None
     status: str | None = None
+    wpm: int | None = None
 
 
 class UpdateLessonStepResultSchema(BaseModel):
@@ -40,6 +46,7 @@ class UpdateLessonStepResultSchema(BaseModel):
     user_id: int | None = None
     percentage: int | None = None
     status: str | None = None
+    wpm: int | None = None
 
 
 class LessonStepBaseSchema(DbEntityBaseSchema):
@@ -68,11 +75,14 @@ class UpdateLessonStepSchema(DbEntityBaseSchema):
 # ------------ lesson -------------------
 
 
-class LessonResultSchema(DbEntityBaseSchema):
+class LessonResultSchema(BaseModel):
     lesson_id: int
     user_id: int
-    percentage: int | None = None
-    status: str | None = None
+    percentage: int | None = None  # процент прохождения
+    status: str | None = None  # статус в процессе , готово, провален
+    average_wpm: int | None = None  # в среднем слов в минуту
+    total_time_spent: int | None = None  # всего времени проведено в уроке
+    total_time_best: int | None = None  # сумма всех лучших времен
 
     model_config = ConfigDict(from_attributes=True)
 

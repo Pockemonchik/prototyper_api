@@ -176,3 +176,36 @@ class LessonsStepResultRepository(BaseSqlAlchemyRepository):
     entity_schema = LessonStepResultSchema
     create_schema = CreateLessonStepResultSchema
     update_schema = UpdateLessonStepResultSchema
+
+    async def get_results_by_user_ant_lesson_with_timings(
+        self,
+        lesson_id: int,
+        user_id: int,
+    ) -> List[LessonStepResultSchema]:
+        """Получение результатов по степу с таймингами"""
+        stmt = (
+            select(self.model)
+            .options(
+                joinedload(self.model.timings),
+            )
+            .where(self.model.lesson_step.and_(LessonStepModel.lesson_id == lesson_id))
+            .where(self.model.user_id == user_id)
+        )
+        obj_list = await self.session.execute(stmt)
+
+        query_result = obj_list.unique().scalars().all()
+
+        result = [
+            LessonStepResultSchema.model_validate(
+                {
+                    **result.__dict__,
+                    "timing_list": [
+                        timing.seconds if timing.seconds else None
+                        for timing in result.timings
+                    ],
+                }
+            )
+            for result in query_result
+        ]
+
+        return result

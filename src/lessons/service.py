@@ -7,7 +7,9 @@ from src.lessons.repository import (
 )
 from src.lessons.schemas import (
     CreateLessonStepResultSchema,
+    LessonResultSchema,
     LessonSchema,
+    LessonStepResultSchema,
     LessonStepSchema,
     SetLessonStepResultForm,
     UpdateLessonStepResultSchema,
@@ -32,14 +34,47 @@ class LessonsService:
     ) -> List[LessonSchema]:
         """Получение всех уроков
         (с результатами пользователя если он авторизован)"""
-        if user_id:
 
-            result = await self.lessons_repo.get_all_lessons_with_user_results(
-                user_id=user_id,
+        lessons = await self.lessons_repo.get_all_lessons()
+        if user_id:
+            for lesson in lessons:
+                lesson.result = await self.collect_lesson_stats_by_user(
+                    lesson_id=lesson.id,
+                    user_id=user_id,
+                )
+
+        return lessons
+
+    async def collect_lesson_stats_by_user(
+        self,
+        user_id: int,
+        lesson_id: int,
+    ) -> LessonResultSchema:
+        """Сбор статистики пользователя по уроку"""
+        step_results: List[LessonStepResultSchema] = (
+            await self.lesson_step_result_repo.get_results_by_user_ant_lesson_with_timings(
+                user_id=user_id, lesson_id=lesson_id
             )
-        else:
-            result = await self.lessons_repo.get_all_lessons()
-        return result
+        )
+        lesson = await self.get_one_lesson_with_steps(
+            lesson_id=lesson_id, user_id=user_id
+        )
+        step_resuts_count = len(step_results)
+        steps_count = len(lesson.steps)
+
+        lesson_result = LessonResultSchema(lesson_id=lesson_id, user_id=user_id)
+        lesson_result.percentage = (step_resuts_count / steps_count) * 100
+        lesson_result.average_wpm = (
+            sum([int(result.wpm) if result.wpm else 0 for result in step_results])
+            / step_resuts_count
+        )
+        lesson_result.total_time_spent = sum(
+            [sum(result.timing_list) for result in step_results]
+        )
+        lesson_result.total_time_best = sum(
+            [min(result.timing_list) for result in step_results]
+        )
+        return lesson_result
 
     async def get_one_lesson_with_steps(
         self, lesson_id: int, user_id: int | None
