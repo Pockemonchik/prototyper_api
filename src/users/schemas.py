@@ -10,9 +10,17 @@ class UserSchema(DbEntityBaseSchema):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserLessonsStats(BaseModel):
+    completed_lessons_count: int | None = None
+    lessons_count: int | None = None
+    total_time_spent: int | None = None
+    model_config = ConfigDict(from_attributes=True)
+
+
 class UserProfileSchema(DbEntityBaseSchema):
     username: str | None = None
     is_admin: bool | None = None
+    lessons_stats: UserLessonsStats | None = None
     model_config = ConfigDict(from_attributes=True)
 
 

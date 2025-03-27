@@ -2,7 +2,6 @@ from sqladmin import ModelView
 
 from src.lessons.models import (
     LessonModel,
-    LessonResultModel,
     LessonStepModel,
     LessonStepResultModel,
     LessonStepTextModel,
@@ -13,14 +12,6 @@ from src.users.models import UserModel
 
 class LessonModelAdmin(ModelView, model=LessonModel):
     column_list = [LessonModel.id, LessonModel.name]
-
-
-class LessonResultModelAdmin(ModelView, model=LessonResultModel):
-    column_list = [
-        LessonResultModel.id,
-        LessonResultModel.user_id,
-        LessonResultModel.lesson_id,
-    ]
 
 
 class LessonStepModelAdmin(ModelView, model=LessonStepModel):

@@ -17,30 +17,10 @@ class LessonModel(BaseSqlAlchemyModel):
     name: Mapped[str]
     description: Mapped[str] = mapped_column(nullable=True)
     language: Mapped[str] = mapped_column(nullable=True)
-    results: Mapped[List["LessonResultModel"]] = relationship(back_populates="lesson")
     steps: Mapped[List["LessonStepModel"]] = relationship(back_populates="lesson")
 
     def __str__(self) -> str:
         return str(self.name)
-
-
-class LessonResultModel(BaseSqlAlchemyModel):
-    """Результат прохождения урока пользователем"""
-
-    __tablename__ = "lesson_results"
-    percentage: Mapped[int] = mapped_column(nullable=True)
-    status: Mapped[str] = mapped_column(
-        nullable=True
-    )  # success" | "fail" | "notchecked"
-
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    user: Mapped["UserModel"] = relationship(back_populates="lessons_results")
-
-    lesson_id: Mapped[int] = mapped_column(ForeignKey("lessons.id"))
-    lesson: Mapped["LessonModel"] = relationship(back_populates="results")
-
-    def __str__(self) -> str:
-        return f"{str(self.user_id,)} {self.status}"
 
 
 # ------------ lesson step -------------------

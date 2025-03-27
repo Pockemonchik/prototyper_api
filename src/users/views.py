@@ -4,7 +4,10 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from fastapi_cache.decorator import cache
 
+from src.lessons.service import LessonsService
 import src.users.dependencies as users_deps
+import src.lessons.dependencies as lessons_deps
+
 from src.core.schemas import APIErrorMessage
 from src.users.schemas import (
     AuthRequestSchema,
@@ -40,6 +43,9 @@ async def get_user_profile(
         UsersService,
         Depends(users_deps.get_users_service_dep),
     ],
+    lessons_service: Annotated[
+        LessonsService, Depends(lessons_deps.get_lesson_service_dep)
+    ],
     user_id: Annotated[
         int,
         Depends(users_deps.get_current_user_id_dep),
@@ -48,7 +54,14 @@ async def get_user_profile(
     """Получение профиля авторизованного пользователя"""
 
     user = await users_service.get_user_by_id(id=user_id)
-    response_data = UserProfileSchema.model_validate(user).model_dump()
+
+    stats = await lessons_service.get_user_lessons_stats(user_id=user_id)
+    response_data = UserProfileSchema.model_validate(
+        {
+            **user.__dict__,
+            "lessons_stats": stats.model_dump(),
+        }
+    ).model_dump()
 
     return JSONResponse(content=response_data, status_code=status.HTTP_200_OK)
 

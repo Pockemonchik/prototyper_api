@@ -7,7 +7,6 @@ from src.core.errors import ResourceNotFoundError
 from src.database.base_repository import BaseSqlAlchemyRepository
 from src.lessons.models import (
     LessonModel,
-    LessonResultModel,
     LessonStepModel,
     LessonStepResultModel,
 )
@@ -16,7 +15,6 @@ from src.lessons.schemas import (
     CreateLessonStepResultSchema,
     CreateLessonStepSchema,
     LessonBaseSchema,
-    LessonResultSchema,
     LessonSchema,
     LessonStepBaseSchema,
     LessonStepResultSchema,
@@ -48,30 +46,6 @@ class LessonsRepository(BaseSqlAlchemyRepository):
 
         return result
 
-    async def get_all_lessons_with_user_results(
-        self, user_id: int
-    ) -> List[LessonSchema]:
-        """Получение всех уроков с результатами пользователя"""
-        stmt = select(self.model).options(
-            joinedload(self.model.results.and_(LessonResultModel.user_id == user_id))
-        )
-        obj_list = await self.session.execute(stmt)
-        result = [
-            LessonSchema.model_validate(
-                {
-                    **lesson.__dict__,
-                    "result": (
-                        LessonResultSchema.model_validate(lesson.results[0])
-                        if user_id and lesson.results
-                        else None
-                    ),
-                }
-            )
-            for lesson in obj_list.unique().scalars().all()
-        ]
-
-        return result
-
     async def get_one_lesson_with_steps(
         self, lesson_id: int, user_id: int | None
     ) -> LessonSchema:
@@ -80,9 +54,6 @@ class LessonsRepository(BaseSqlAlchemyRepository):
             stmt = (
                 select(self.model)
                 .options(
-                    joinedload(
-                        self.model.results.and_(LessonResultModel.user_id == user_id)
-                    ),
                     joinedload(self.model.steps).joinedload(
                         LessonStepModel.results.and_(
                             LessonStepResultModel.user_id == user_id
@@ -110,11 +81,7 @@ class LessonsRepository(BaseSqlAlchemyRepository):
         result = LessonSchema.model_validate(
             {
                 **lesson.__dict__,
-                "result": (
-                    LessonResultSchema.model_validate(lesson.results[0])
-                    if user_id and lesson.results
-                    else None
-                ),
+                "result": None,
                 "steps": [
                     LessonStepSchema.model_validate(
                         {

@@ -15,7 +15,6 @@ from src.users.errors import AuthError
 from src.core import settings
 from src.core.admin import (
     LessonModelAdmin,
-    LessonResultModelAdmin,
     LessonStepModelAdmin,
     LessonStepResultModelAdmin,
     LessonStepTextModelAdmin,
@@ -63,7 +62,6 @@ admin = Admin(
 
 admin.add_view(UserModelAdmin)
 admin.add_view(LessonModelAdmin)
-admin.add_view(LessonResultModelAdmin)
 admin.add_view(LessonStepModelAdmin)
 admin.add_view(LessonStepTextModelAdmin)
 admin.add_view(LessonStepResultModelAdmin)

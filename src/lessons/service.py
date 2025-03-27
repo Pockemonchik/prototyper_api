@@ -1,5 +1,6 @@
 from typing import List
 
+from src.users.schemas import UserLessonsStats
 from src.lessons.repository import (
     LessonsRepository,
     LessonsStepRepository,
@@ -45,6 +46,48 @@ class LessonsService:
 
         return lessons
 
+    async def get_user_lessons_stats(self, user_id: int) -> UserLessonsStats:
+        """Общая статистика пользователя
+        по прохождению уроков уроков"""
+
+        lessons = await self.get_all_lessons_with_user_results(user_id=user_id)
+        user_stats = UserLessonsStats()
+        user_stats.completed_lessons_count = len(
+            [
+                lesson.result.percentage
+                for lesson in lessons
+                if lesson.result and lesson.result.percentage == 100
+            ]
+        )
+        user_stats.lessons_count = len(
+            [lesson.result for lesson in lessons if lesson.result]
+        )
+
+        user_stats.total_time_spent = sum(
+            [
+                lesson.result.total_time_spent
+                for lesson in lessons
+                if lesson.result and lesson.result.total_time_spent
+            ]
+        )
+
+        return user_stats
+
+    async def get_one_lesson_with_steps(
+        self, lesson_id: int, user_id: int | None
+    ) -> LessonSchema:
+        """Получение урока с этапами и их результатми"""
+        lesson = await self.lessons_repo.get_one_lesson_with_steps(
+            user_id=user_id,
+            lesson_id=lesson_id,
+        )
+        if user_id:
+            lesson.result = await self.collect_lesson_stats_by_user(
+                user_id=user_id,
+                lesson_id=lesson_id,
+            )
+        return lesson
+
     async def collect_lesson_stats_by_user(
         self,
         user_id: int,
@@ -56,7 +99,7 @@ class LessonsService:
                 user_id=user_id, lesson_id=lesson_id
             )
         )
-        lesson = await self.get_one_lesson_with_steps(
+        lesson = await self.lessons_repo.get_one_lesson_with_steps(
             lesson_id=lesson_id, user_id=user_id
         )
         step_resuts_count = len(step_results)
@@ -75,16 +118,6 @@ class LessonsService:
             [min(result.timing_list) for result in step_results]
         )
         return lesson_result
-
-    async def get_one_lesson_with_steps(
-        self, lesson_id: int, user_id: int | None
-    ) -> LessonSchema:
-        """Получение урока с этапами и их результатми"""
-        result = await self.lessons_repo.get_one_lesson_with_steps(
-            user_id=user_id,
-            lesson_id=lesson_id,
-        )
-        return result
 
     async def get_lesson_step_with_texts(
         self,
