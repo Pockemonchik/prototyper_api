@@ -5,9 +5,11 @@ from src.lessons.repository import (
     LessonsRepository,
     LessonsStepRepository,
     LessonsStepResultRepository,
+    LessonsStepTimingRepository,
 )
 from src.lessons.schemas import (
     CreateLessonStepResultSchema,
+    CreateLessonStepTimingSchema,
     LessonResultSchema,
     LessonSchema,
     LessonStepResultSchema,
@@ -25,10 +27,12 @@ class LessonsService:
         lessons_repo: LessonsRepository,
         lesson_steps_repo: LessonsStepRepository,
         lesson_step_result_repo: LessonsStepResultRepository,
+        lesson_step_timing_repo: LessonsStepTimingRepository,
     ):
         self.lessons_repo = lessons_repo
         self.lesson_steps_repo = lesson_steps_repo
         self.lesson_step_result_repo = lesson_step_result_repo
+        self.lesson_step_timing_repo = lesson_step_timing_repo
 
     async def get_all_lessons_with_user_results(
         self, user_id: int | None
@@ -47,8 +51,7 @@ class LessonsService:
         return lessons
 
     async def get_user_lessons_stats(self, user_id: int) -> UserLessonsStats:
-        """Общая статистика пользователя
-        по прохождению уроков уроков"""
+        """Общая статистика пользователя по прохождению уроков"""
 
         lessons = await self.get_all_lessons_with_user_results(user_id=user_id)
         user_stats = UserLessonsStats()
@@ -137,7 +140,9 @@ class LessonsService:
         exist_result = await self.lesson_step_result_repo.filter_by_field(
             lesson_step_id=step_id, user_id=user_id
         )
+
         if exist_result:
+            # обновляем существующий результат
             updated_result = UpdateLessonStepResultSchema.model_validate(
                 {
                     **new_step_result.model_dump(),
@@ -148,8 +153,9 @@ class LessonsService:
             result = await self.lesson_step_result_repo.update_one(
                 id=exist_result[0].id, update_entity=updated_result
             )
-            return result.id
+
         else:
+            # создаем новый результат
             create_result = CreateLessonStepResultSchema.model_validate(
                 {
                     **new_step_result.model_dump(),
@@ -160,4 +166,11 @@ class LessonsService:
             result = await self.lesson_step_result_repo.add_one(
                 new_entity=create_result
             )
-            return result.id
+        # добавляем время к результату
+        if new_step_result.timing:
+            new_timing = CreateLessonStepTimingSchema(
+                seconds=new_step_result.timing, lesson_step_result_id=result.id
+            )
+            await self.lesson_step_timing_repo.add_one(new_timing)
+
+        return result.id

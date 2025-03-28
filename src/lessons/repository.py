@@ -9,19 +9,23 @@ from src.lessons.models import (
     LessonModel,
     LessonStepModel,
     LessonStepResultModel,
+    LessonStepTimingModel,
 )
 from src.lessons.schemas import (
     CreateLessonSchema,
     CreateLessonStepResultSchema,
     CreateLessonStepSchema,
+    CreateLessonStepTimingSchema,
     LessonBaseSchema,
     LessonSchema,
     LessonStepBaseSchema,
     LessonStepResultSchema,
     LessonStepSchema,
+    LessonStepTimingSchema,
     UpdateLessonSchema,
     UpdateLessonStepResultSchema,
     UpdateLessonStepSchema,
+    UpdateLessonStepTimingSchema,
 )
 
 
@@ -54,11 +58,9 @@ class LessonsRepository(BaseSqlAlchemyRepository):
             stmt = (
                 select(self.model)
                 .options(
-                    joinedload(self.model.steps).joinedload(
-                        LessonStepModel.results.and_(
-                            LessonStepResultModel.user_id == user_id
-                        )
-                    ),
+                    joinedload(self.model.steps)
+                    .joinedload(LessonStepModel.results)
+                    .options(joinedload(LessonStepResultModel.timings)),
                     joinedload(self.model.steps).joinedload(LessonStepModel.texts),
                 )
                 .where(self.model.id == lesson_id)
@@ -88,7 +90,15 @@ class LessonsRepository(BaseSqlAlchemyRepository):
                             **step.__dict__,
                             "texts": [text.text for text in step.texts],
                             "result": (
-                                LessonStepResultSchema.model_validate(step.results[0])
+                                LessonStepResultSchema.model_validate(
+                                    {
+                                        **step.results[0].__dict__,
+                                        "timing_list": [
+                                            timing.seconds
+                                            for timing in step.results[0].timings
+                                        ],
+                                    }
+                                )
                                 if user_id and step.results
                                 else None
                             ),
@@ -176,3 +186,12 @@ class LessonsStepResultRepository(BaseSqlAlchemyRepository):
         ]
 
         return result
+
+
+class LessonsStepTimingRepository(BaseSqlAlchemyRepository):
+    """Репозиторий для управления времени шага урока"""
+
+    model: type[LessonStepTimingModel] = LessonStepTimingModel
+    entity_schema = LessonStepTimingSchema
+    create_schema = CreateLessonStepTimingSchema
+    update_schema = UpdateLessonStepTimingSchema

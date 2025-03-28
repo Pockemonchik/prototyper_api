@@ -47,6 +47,7 @@ class UpdateLessonStepResultSchema(BaseModel):
     percentage: int | None = None
     status: str | None = None
     wpm: int | None = None
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LessonStepBaseSchema(DbEntityBaseSchema):
@@ -68,8 +69,26 @@ class CreateLessonStepSchema(BaseModel):
     name: str | None = None
 
 
-class UpdateLessonStepSchema(DbEntityBaseSchema):
+class UpdateLessonStepSchema(BaseModel):
     name: str | None = None
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LessonStepTimingSchema(DbEntityBaseSchema):
+    seconds: int
+    lesson_step_result_id: int
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CreateLessonStepTimingSchema(BaseModel):
+    seconds: int
+    lesson_step_result_id: int
+
+
+class UpdateLessonStepTimingSchema(BaseModel):
+    seconds: int
+    lesson_step_result_id: int
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ------------ lesson -------------------
