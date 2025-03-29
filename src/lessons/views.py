@@ -48,6 +48,30 @@ async def get_lessons_list(
 
 
 @router.get(
+    "/stats",
+    response_model=List[LessonSchema],
+    responses={
+        400: {"model": APIErrorMessage},
+        500: {"model": APIErrorMessage},
+    },
+)
+@cache(expire=100)
+async def get_lessons_list_with_stats(
+    lesson_service: Annotated[
+        LessonsService,
+        Depends(lessons_deps.get_lesson_service_dep),
+    ],
+) -> JSONResponse:
+    """Получение списка уроков c шагами и со статистикой"""
+    logger.debug("get_lessons_list with stats}")
+    lesson_list = await lesson_service.get_all_lessons_with_steps_and_stats()
+    logger.debug(f"get_lessons_list with {lesson_list}")
+    response_data = [lesson.model_dump() for lesson in lesson_list]
+
+    return JSONResponse(content=response_data, status_code=status.HTTP_200_OK)
+
+
+@router.get(
     "/{id}",
     response_model=LessonSchema,
     responses={

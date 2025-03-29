@@ -12,8 +12,10 @@ from src.lessons.schemas import (
     CreateLessonStepTimingSchema,
     LessonResultSchema,
     LessonSchema,
+    LessonStatsSchema,
     LessonStepResultSchema,
     LessonStepSchema,
+    LessonStepStatsSchema,
     SetLessonStepResultForm,
     UpdateLessonStepResultSchema,
 )
@@ -50,9 +52,25 @@ class LessonsService:
 
         return lessons
 
+    async def get_all_lessons_with_steps_and_stats(self) -> List[LessonSchema]:
+        """Получение всех уроков с шагами и статистикой"""
+        lessons_id_list = [
+            lesson.id for lesson in await self.lessons_repo.get_all_lessons()
+        ]
+        lessons = []
+        for lesson_id in lessons_id_list:
+            lesson: LessonSchema = await self.get_one_lesson_with_steps(
+                lesson_id=lesson_id
+            )
+            lesson.stats = await self.get_lesson_stats(lesson_id=lesson.id)
+            for step in lesson.steps:
+                step.stats = await self.get_lesson_step_stats(lesson_step_id=step.id)
+            lessons.append(lesson)
+
+        return lessons
+
     async def get_user_lessons_stats(self, user_id: int) -> UserLessonsStats:
         """Общая статистика пользователя по прохождению уроков"""
-
         lessons = await self.get_all_lessons_with_user_results(user_id=user_id)
         user_stats = UserLessonsStats()
         user_stats.completed_lessons_count = len(
@@ -76,8 +94,38 @@ class LessonsService:
 
         return user_stats
 
+    async def get_lesson_stats(self, lesson_id: int) -> LessonStatsSchema:
+        """Общая статистика по уроку"""
+        lesson: LessonSchema = await self.get_one_lesson_with_steps(lesson_id=lesson_id)
+        stats = LessonStatsSchema()
+        stats.steps_count = len(lesson.steps)
+        all_users = []
+        for step in lesson.steps:
+            user_id_list = (
+                await self.lesson_step_result_repo.get_users_with_lesson_step_result(
+                    step_id=step.id
+                )
+            )
+            all_users.extend(user_id_list)
+        stats.users_count = len(set(all_users))
+
+        return stats
+
+    async def get_lesson_step_stats(self, lesson_step_id: int) -> LessonStepStatsSchema:
+        """Общая статистика по шагу урока"""
+
+        stats = LessonStepStatsSchema()
+        user_id_list = (
+            await self.lesson_step_result_repo.get_users_with_lesson_step_result(
+                step_id=lesson_step_id
+            )
+        )
+        stats.users_count = len(set(user_id_list))
+
+        return stats
+
     async def get_one_lesson_with_steps(
-        self, lesson_id: int, user_id: int | None
+        self, lesson_id: int, user_id: int | None = None
     ) -> LessonSchema:
         """Получение урока с этапами и их результатми"""
         lesson = await self.lessons_repo.get_one_lesson_with_steps(

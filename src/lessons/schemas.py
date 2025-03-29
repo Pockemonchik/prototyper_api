@@ -11,7 +11,13 @@ from src.database.base_schemas import DbEntityBaseSchema
 # (для того чтобы исключить lazy load и работали базовые методы Repository)
 
 
-# ------------ lesson step -------------------
+# ------------ result of lesson step -------------------
+
+
+class LessonStepStatsSchema(BaseModel):
+    users_count: int | None = None  # количество пользователей
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LessonStepResultSchema(DbEntityBaseSchema):
@@ -50,28 +56,7 @@ class UpdateLessonStepResultSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class LessonStepBaseSchema(DbEntityBaseSchema):
-    name: str | None = None
-    description: str | None = None
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class LessonStepSchema(LessonStepBaseSchema):
-
-    texts: List[str] | None = None
-    result: LessonStepResultSchema | None = None
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class CreateLessonStepSchema(BaseModel):
-    name: str | None = None
-
-
-class UpdateLessonStepSchema(BaseModel):
-    name: str | None = None
-    model_config = ConfigDict(from_attributes=True)
+# ------------ timing of lesson step -------------------
 
 
 class LessonStepTimingSchema(DbEntityBaseSchema):
@@ -91,7 +76,41 @@ class UpdateLessonStepTimingSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+# ------------ lesson step -------------------
+
+
+class LessonStepBaseSchema(DbEntityBaseSchema):
+    name: str | None = None
+    description: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LessonStepSchema(LessonStepBaseSchema):
+    stats: LessonStepStatsSchema | None = None
+    texts: List[str] | None = None
+    result: LessonStepResultSchema | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CreateLessonStepSchema(BaseModel):
+    name: str | None = None
+
+
+class UpdateLessonStepSchema(BaseModel):
+    name: str | None = None
+    model_config = ConfigDict(from_attributes=True)
+
+
 # ------------ lesson -------------------
+
+
+class LessonStatsSchema(BaseModel):
+    users_count: int | None = None  # количество пользователей
+    steps_count: int | None = None  # количество шагов
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LessonResultSchema(BaseModel):
@@ -115,7 +134,7 @@ class LessonBaseSchema(DbEntityBaseSchema):
 
 
 class LessonSchema(LessonBaseSchema):
-
+    stats: LessonStatsSchema | None = None
     result: LessonResultSchema | None = None
     steps: List[LessonStepSchema] | None = None
 
