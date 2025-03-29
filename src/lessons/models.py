@@ -52,7 +52,7 @@ class LessonStepTextModel(BaseSqlAlchemyModel):
     """Текст этапа урока"""
 
     __tablename__ = "lesson_step_texts"
-    name: Mapped[str]
+    name: Mapped[str] = mapped_column(nullable=True)
     text: Mapped[str] = mapped_column(nullable=True)
     lesson_step_id: Mapped[int] = mapped_column(ForeignKey("lesson_steps.id"))
     lesson_step: Mapped["LessonStepModel"] = relationship(back_populates="texts")

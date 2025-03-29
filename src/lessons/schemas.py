@@ -95,11 +95,45 @@ class LessonStepSchema(LessonStepBaseSchema):
 
 
 class CreateLessonStepSchema(BaseModel):
+    lesson_id: int
     name: str | None = None
+
+
+class CreateLessonStepForm(BaseModel):
+    lesson_id: int | None = None
+    name: str | None = None
+    texts: List[str] | None
 
 
 class UpdateLessonStepSchema(BaseModel):
     name: str | None = None
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ------------ text of lesson step -------------------
+
+
+class LessonStepTextSchema(BaseModel):
+    lesson_step_id: int | None = None
+    name: str | None = None
+    text: str | None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CreateLessonStepTextSchema(BaseModel):
+    lesson_step_id: int | None = None
+    name: str | None = None
+    text: str | None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UpdateLessonStepTextSchema(BaseModel):
+    lesson_step_id: int | None = None
+    name: str | None = None
+    text: str | None
+
     model_config = ConfigDict(from_attributes=True)
 
 

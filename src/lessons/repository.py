@@ -9,22 +9,26 @@ from src.lessons.models import (
     LessonModel,
     LessonStepModel,
     LessonStepResultModel,
+    LessonStepTextModel,
     LessonStepTimingModel,
 )
 from src.lessons.schemas import (
     CreateLessonSchema,
     CreateLessonStepResultSchema,
     CreateLessonStepSchema,
+    CreateLessonStepTextSchema,
     CreateLessonStepTimingSchema,
     LessonBaseSchema,
     LessonSchema,
     LessonStepBaseSchema,
     LessonStepResultSchema,
     LessonStepSchema,
+    LessonStepTextSchema,
     LessonStepTimingSchema,
     UpdateLessonSchema,
     UpdateLessonStepResultSchema,
     UpdateLessonStepSchema,
+    UpdateLessonStepTextSchema,
     UpdateLessonStepTimingSchema,
 )
 
@@ -210,3 +214,12 @@ class LessonsStepTimingRepository(BaseSqlAlchemyRepository):
     entity_schema = LessonStepTimingSchema
     create_schema = CreateLessonStepTimingSchema
     update_schema = UpdateLessonStepTimingSchema
+
+
+class LessonStepTextRepository(BaseSqlAlchemyRepository):
+    """Репозиторий для управления текстами уроков"""
+
+    model: type[LessonStepTextModel] = LessonStepTextModel
+    entity_schema = LessonStepTextSchema
+    create_schema = CreateLessonStepTextSchema
+    update_schema = UpdateLessonStepTextSchema

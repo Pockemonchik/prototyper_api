@@ -11,6 +11,7 @@ from src.core.schemas import APIErrorMessage
 from src.database.base_schemas import DbEntityBaseSchema
 from src.lessons.schemas import (
     CreateLessonSchema,
+    CreateLessonStepForm,
     LessonSchema,
     LessonStepSchema,
     SetLessonStepResultForm,
@@ -152,6 +153,38 @@ async def get_lesson_step_by_id(
         step_id=step_id,
     )
     response_data = LessonStepSchema.model_validate(step).model_dump()
+
+    return JSONResponse(content=response_data, status_code=status.HTTP_200_OK)
+
+
+@router.post(
+    "/{id}/steps",
+    response_model=LessonStepSchema,
+    responses={
+        400: {"model": APIErrorMessage},
+        500: {"model": APIErrorMessage},
+    },
+    dependencies=[Depends(users_deps.is_auth_dep)],
+)
+async def create_lesson_step(
+    lesson_service: Annotated[
+        LessonsService,
+        Depends(lessons_deps.get_lesson_service_dep),
+    ],
+    id: int,
+    step_id: int,
+    new_step: CreateLessonStepForm,
+) -> JSONResponse:
+    """Создание этапа крока"""
+    logger.debug(f"get_lesson_step_by_id lesson_id={id} step_id={step_id} ")
+
+    new_step.lesson_id = id
+
+    created_step = await lesson_service.create_lesson_step(
+        new_step=CreateLessonStepForm.model_validate(new_step)
+    )
+
+    response_data = LessonStepSchema.model_validate(created_step).model_dump()
 
     return JSONResponse(content=response_data, status_code=status.HTTP_200_OK)
 

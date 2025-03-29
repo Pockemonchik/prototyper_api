@@ -2,6 +2,7 @@ from typing import List
 
 from src.users.schemas import UserLessonsStats
 from src.lessons.repository import (
+    LessonStepTextRepository,
     LessonsRepository,
     LessonsStepRepository,
     LessonsStepResultRepository,
@@ -9,7 +10,10 @@ from src.lessons.repository import (
 )
 from src.lessons.schemas import (
     CreateLessonSchema,
+    CreateLessonStepForm,
     CreateLessonStepResultSchema,
+    CreateLessonStepSchema,
+    CreateLessonStepTextSchema,
     CreateLessonStepTimingSchema,
     LessonResultSchema,
     LessonSchema,
@@ -31,17 +35,32 @@ class LessonsService:
         lesson_steps_repo: LessonsStepRepository,
         lesson_step_result_repo: LessonsStepResultRepository,
         lesson_step_timing_repo: LessonsStepTimingRepository,
+        lesson_step_text_repo: LessonStepTextRepository,
     ):
         self.lessons_repo = lessons_repo
         self.lesson_steps_repo = lesson_steps_repo
         self.lesson_step_result_repo = lesson_step_result_repo
         self.lesson_step_timing_repo = lesson_step_timing_repo
+        self.lesson_step_text_repo = lesson_step_text_repo
 
     async def create_lesson(self, new_lesson: CreateLessonSchema) -> LessonSchema:
         """Создание урока"""
         created_lesson = await self.lessons_repo.add_one(new_entity=new_lesson)
 
         return created_lesson
+
+    async def create_lesson_step(
+        self, new_step: CreateLessonStepForm
+    ) -> LessonStepSchema:
+        """Создание этапа урока с текстами"""
+        new_step_valid = CreateLessonStepSchema.model_validate(new_step.model_dump())
+        created_step = await self.lesson_steps_repo.add_one(new_entity=new_step_valid)
+        for text in new_step.texts:
+            new_text = CreateLessonStepTextSchema(
+                lesson_step_id=created_step.id, text=text
+            )
+            await self.lesson_step_text_repo.add_one(new_text)
+        return created_step
 
     async def get_all_lessons_with_user_results(
         self, user_id: int | None
