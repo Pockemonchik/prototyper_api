@@ -9,7 +9,12 @@ import src.users.dependencies as users_deps
 from src.core.logger import logger
 from src.core.schemas import APIErrorMessage
 from src.database.base_schemas import DbEntityBaseSchema
-from src.lessons.schemas import LessonSchema, LessonStepSchema, SetLessonStepResultForm
+from src.lessons.schemas import (
+    CreateLessonSchema,
+    LessonSchema,
+    LessonStepSchema,
+    SetLessonStepResultForm,
+)
 from src.lessons.service import LessonsService
 
 router = APIRouter(
@@ -47,6 +52,29 @@ async def get_lessons_list(
     return JSONResponse(content=response_data, status_code=status.HTTP_200_OK)
 
 
+@router.post(
+    "/",
+    response_model=LessonSchema,
+    responses={
+        400: {"model": APIErrorMessage},
+        500: {"model": APIErrorMessage},
+    },
+)
+async def create_lesson(
+    lesson_service: Annotated[
+        LessonsService,
+        Depends(lessons_deps.get_lesson_service_dep),
+    ],
+    new_lesson: CreateLessonSchema,
+) -> JSONResponse:
+    """Создание урока"""
+    logger.debug("create lesson")
+    created_lesson = await lesson_service.create_lesson(new_lesson)
+    response_data = created_lesson.model_dump()
+
+    return JSONResponse(content=response_data, status_code=status.HTTP_200_OK)
+
+
 @router.get(
     "/stats",
     response_model=List[LessonSchema],
@@ -65,7 +93,6 @@ async def get_lessons_list_with_stats(
     """Получение списка уроков c шагами и со статистикой"""
     logger.debug("get_lessons_list with stats}")
     lesson_list = await lesson_service.get_all_lessons_with_steps_and_stats()
-    logger.debug(f"get_lessons_list with {lesson_list}")
     response_data = [lesson.model_dump() for lesson in lesson_list]
 
     return JSONResponse(content=response_data, status_code=status.HTTP_200_OK)

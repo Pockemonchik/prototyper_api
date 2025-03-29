@@ -8,6 +8,7 @@ from src.lessons.repository import (
     LessonsStepTimingRepository,
 )
 from src.lessons.schemas import (
+    CreateLessonSchema,
     CreateLessonStepResultSchema,
     CreateLessonStepTimingSchema,
     LessonResultSchema,
@@ -35,6 +36,12 @@ class LessonsService:
         self.lesson_steps_repo = lesson_steps_repo
         self.lesson_step_result_repo = lesson_step_result_repo
         self.lesson_step_timing_repo = lesson_step_timing_repo
+
+    async def create_lesson(self, new_lesson: CreateLessonSchema) -> LessonSchema:
+        """Создание урока"""
+        created_lesson = await self.lessons_repo.add_one(new_entity=new_lesson)
+
+        return created_lesson
 
     async def get_all_lessons_with_user_results(
         self, user_id: int | None
