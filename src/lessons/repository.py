@@ -191,9 +191,7 @@ class LessonsStepResultRepository(BaseSqlAlchemyRepository):
 
         return result
 
-    async def get_users_with_lesson_step_result(
-        self, step_id: List[int]
-    ) -> LessonStepSchema:
+    async def get_users_with_lesson_step_result(self, step_id: int) -> LessonStepSchema:
         """Получение всех пользователей, кто проходил шаг урока"""
         stmt = (
             select(self.model.user_id)
@@ -203,8 +201,8 @@ class LessonsStepResultRepository(BaseSqlAlchemyRepository):
         obj_list = await self.session.execute(stmt)
 
         query_result = obj_list.unique().scalars().all()
-
-        return query_result
+        result = [int(obj) for obj in query_result]
+        return result
 
 
 class LessonsStepTimingRepository(BaseSqlAlchemyRepository):

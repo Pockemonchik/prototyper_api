@@ -4,11 +4,10 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from fastapi_cache.decorator import cache
 
-from src.lessons.service import LessonsService
-import src.users.dependencies as users_deps
 import src.lessons.dependencies as lessons_deps
-
+import src.users.dependencies as users_deps
 from src.core.schemas import APIErrorMessage
+from src.lessons.service import LessonsService
 from src.users.schemas import (
     AuthRequestSchema,
     CreateUserSchema,

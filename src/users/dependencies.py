@@ -23,7 +23,7 @@ async def get_auth_service_dep(
 
 async def get_users_service_dep(
     session: Annotated[AsyncSession, Depends(get_session)],
-) -> AuthService:
+) -> UsersService:
     """Получение сервиса auth"""
     users_repo = UsersRepository(session=session)
 

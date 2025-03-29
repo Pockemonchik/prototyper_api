@@ -1,12 +1,11 @@
 from typing import List
 
-from src.users.schemas import UserLessonsStats
 from src.lessons.repository import (
-    LessonStepTextRepository,
     LessonsRepository,
     LessonsStepRepository,
     LessonsStepResultRepository,
     LessonsStepTimingRepository,
+    LessonStepTextRepository,
 )
 from src.lessons.schemas import (
     CreateLessonSchema,
@@ -24,6 +23,7 @@ from src.lessons.schemas import (
     SetLessonStepResultForm,
     UpdateLessonStepResultSchema,
 )
+from src.users.schemas import UserLessonsStats
 
 
 class LessonsService:
@@ -126,13 +126,12 @@ class LessonsService:
         stats = LessonStatsSchema()
         stats.steps_count = len(lesson.steps)
         all_users = []
-        for step in lesson.steps:
-            user_id_list = (
-                await self.lesson_step_result_repo.get_users_with_lesson_step_result(
+        if lesson.steps:
+            for step in lesson.steps:
+                user_id_list = await self.lesson_step_result_repo.get_users_with_lesson_step_result(
                     step_id=step.id
                 )
-            )
-            all_users.extend(user_id_list)
+                all_users.extend(user_id_list)
         stats.users_count = len(set(all_users))
 
         return stats
@@ -179,21 +178,22 @@ class LessonsService:
         lesson = await self.lessons_repo.get_one_lesson_with_steps(
             lesson_id=lesson_id, user_id=user_id
         )
-        step_resuts_count = len(step_results)
-        steps_count = len(lesson.steps)
-
+        step_results_count = len(step_results) if lesson.steps else 0
+        steps_count = len(lesson.steps) if lesson.steps else 0
         lesson_result = LessonResultSchema(lesson_id=lesson_id, user_id=user_id)
-        lesson_result.percentage = (step_resuts_count / steps_count) * 100
-        lesson_result.average_wpm = (
-            sum([int(result.wpm) if result.wpm else 0 for result in step_results])
-            / step_resuts_count
-        )
-        lesson_result.total_time_spent = sum(
-            [sum(result.timing_list) for result in step_results]
-        )
-        lesson_result.total_time_best = sum(
-            [min(result.timing_list) for result in step_results]
-        )
+
+        if step_results_count and steps_count:
+            lesson_result.percentage = int((step_results_count / steps_count) * 100)
+            lesson_result.average_wpm = int(
+                sum([int(result.wpm) if result.wpm else 0 for result in step_results])
+                / step_results_count
+            )
+            lesson_result.total_time_spent = sum(
+                [sum(result.timing_list) for result in step_results]
+            )
+            lesson_result.total_time_best = sum(
+                [min(result.timing_list) for result in step_results]
+            )
         return lesson_result
 
     async def get_lesson_step_with_texts(
