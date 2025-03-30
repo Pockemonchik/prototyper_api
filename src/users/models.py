@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.database.base_model import BaseSqlAlchemyModel
 
 if TYPE_CHECKING:
+    from src.texts.models import TextResultModel
     from src.lessons.models import LessonStepResultModel
 
 

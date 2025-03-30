@@ -110,9 +110,7 @@ async def resource_not_found_error_handler(
 
 
 @api.exception_handler(AuthError)
-async def auth_error_handler(
-    request: Request, exc: AuthError
-) -> JSONResponse:
+async def auth_error_handler(request: Request, exc: AuthError) -> JSONResponse:
     error_msg = APIErrorMessage(
         type=exc.__class__.__name__,
         message=f"{exc.args}",
