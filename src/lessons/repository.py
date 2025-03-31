@@ -180,10 +180,11 @@ class LessonsStepResultRepository(BaseSqlAlchemyRepository):
             LessonStepResultSchema.model_validate(
                 {
                     **result.__dict__,
-                    "timing_list": [
-                        timing.seconds if timing.seconds else None
-                        for timing in result.timings
-                    ] if result.timings else None,
+                    "timing_list": (
+                        [timing.seconds for timing in result.timings if timing.seconds]
+                        if result.timings
+                        else None
+                    ),
                 }
             )
             for result in query_result
