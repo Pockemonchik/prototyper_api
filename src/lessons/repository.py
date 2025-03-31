@@ -183,7 +183,7 @@ class LessonsStepResultRepository(BaseSqlAlchemyRepository):
                     "timing_list": [
                         timing.seconds if timing.seconds else None
                         for timing in result.timings
-                    ],
+                    ] if result.timings else None,
                 }
             )
             for result in query_result
