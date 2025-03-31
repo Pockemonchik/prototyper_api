@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Any
 
 from pydantic import BaseModel, ConfigDict
 
@@ -27,7 +27,9 @@ class LessonStepResultSchema(DbEntityBaseSchema):
     status: str | None = None
     wpm: int | None = None
 
-    timing_list: int | List[int] | None = None
+    # timing_list: int | List[int] | None = None
+
+    timing_list: Any = None
 
     model_config = ConfigDict(from_attributes=True)
 
