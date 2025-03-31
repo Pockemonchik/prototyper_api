@@ -189,10 +189,18 @@ class LessonsService:
                 / step_results_count
             )
             lesson_result.total_time_spent = sum(
-                [sum(result.timing_list) for result in step_results]
+                [
+                    sum(result.timing_list)
+                    for result in step_results
+                    if result.timing_list
+                ]
             )
             lesson_result.total_time_best = sum(
-                [min(result.timing_list) for result in step_results]
+                [
+                    min(result.timing_list)
+                    for result in step_results
+                    if result.timing_list
+                ]
             )
         return lesson_result
 
